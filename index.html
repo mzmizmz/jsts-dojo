@@ -1,0 +1,2557 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>JS→TS 道場</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: phone-first single column. Sticky top bar, route bar hero, lesson = prose + dark code cells, fixed two-tab bar. */
+:root{
+  --bg:#EDF0F5; --surface:#FFFFFF; --surface-2:#F5F7FA; --ink:#131A28; --muted:#566178; --line:#D8DEE8;
+  --js:#EBCB00; --js-ink:#1C1700; --js-soft:#FFF5C2; --js-text:#7A6500;
+  --ts:#2D6BC1; --ts-ink:#FFFFFF; --ts-soft:#DDE8F8; --ts-text:#2459A3;
+  --ok:#15804A; --ok-soft:#DCF2E5; --err:#BE3128; --err-soft:#FBE4E1; --warn:#946000; --warn-soft:#FCF0D5;
+  --code-bg:#141B2A; --code-bar:#1B2436; --out-bg:#0E1420; --code-fg:#E3E8F1; --code-muted:#7C89A2; --code-line:#26304A;
+  --tk-kw:#FF8FB3; --tk-str:#B9E58A; --tk-num:#FFC46B; --tk-com:#6E7B94; --tk-fn:#84C9FF; --tk-type:#7FE0D2;
+  --font-display:"Dela Gothic One","Zen Kaku Gothic New","Hiragino Sans",sans-serif;
+  --font-body:"Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono","Zen Kaku Gothic New",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0A0E16; --surface:#121927; --surface-2:#172032; --ink:#E6EBF4; --muted:#94A1B9; --line:#253049;
+  --js:#F7DF1E; --js-ink:#1C1700; --js-soft:#2B270A; --js-text:#F2DA3A;
+  --ts:#5E9DEB; --ts-ink:#07101E; --ts-soft:#12243F; --ts-text:#8CBBF3;
+  --ok:#4DCB8B; --ok-soft:#0F2A1D; --err:#FF7B70; --err-soft:#341410; --warn:#F2B648; --warn-soft:#2D210A;
+  --code-bg:#0B111C; --code-bar:#111929; --out-bg:#070B13; --code-line:#1C2537;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0A0E16; --surface:#121927; --surface-2:#172032; --ink:#E6EBF4; --muted:#94A1B9; --line:#253049;
+  --js:#F7DF1E; --js-ink:#1C1700; --js-soft:#2B270A; --js-text:#F2DA3A;
+  --ts:#5E9DEB; --ts-ink:#07101E; --ts-soft:#12243F; --ts-text:#8CBBF3;
+  --ok:#4DCB8B; --ok-soft:#0F2A1D; --err:#FF7B70; --err-soft:#341410; --warn:#F2B648; --warn-soft:#2D210A;
+  --code-bg:#0B111C; --code-bar:#111929; --out-bg:#070B13; --code-line:#1C2537;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.75;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--ts);outline-offset:2px}
+code{font-family:var(--font-mono);font-size:.88em;background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:0 .3em;white-space:nowrap}
+
+/* top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:760px;margin:0 auto;height:56px;display:flex;align-items:center;gap:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.mark{display:flex;gap:2px;flex:none}
+.mark span{width:22px;height:22px;display:grid;place-items:end end;padding:0 2px 1px 0;font:700 9px/1 var(--font-mono);border-radius:3px}
+.mark .j{background:var(--js);color:var(--js-ink)}
+.mark .t{background:var(--ts);color:var(--ts-ink)}
+.topbar h2{margin:0;font:400 17px/1.2 var(--font-display);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.back{border:0;background:none;padding:8px 10px 8px 0;margin-right:-4px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:4px;flex:none}
+.top-count{font:600 13px/1 var(--font-mono);color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+
+.app{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px calc(96px + env(safe-area-inset-bottom,0px))}
+
+/* tab bar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabbar-in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.tab{border:0;background:none;height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;font-weight:700;color:var(--muted)}
+.tab svg{width:22px;height:22px}
+.tab[aria-current="page"]{color:var(--ink)}
+.tab[aria-current="page"] svg{color:var(--ts)}
+
+/* home */
+.hero{display:grid;gap:14px;margin-bottom:28px}
+.hero h1{margin:0;font:400 clamp(30px,8.5vw,44px)/1.15 var(--font-display);letter-spacing:.01em;text-wrap:balance}
+.hero h1 .arrow{color:var(--muted)}
+.hero p{margin:0;color:var(--muted);max-width:34em}
+.route{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:10px}
+.route-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.route-head b{font:400 26px/1 var(--font-display);font-variant-numeric:tabular-nums}
+.route-head b small{font:600 14px var(--font-mono);color:var(--muted);margin-left:4px}
+.route-head span{font-size:13px;color:var(--muted)}
+.cells{display:grid;grid-template-columns:repeat(23,1fr);gap:3px}
+.cell{height:16px;border-radius:3px;background:var(--line)}
+.cell.js.on{background:var(--js)}
+.cell.ts.on{background:var(--ts)}
+.cell.now{box-shadow:inset 0 0 0 2px var(--ink)}
+.route-ends{display:flex;justify-content:space-between;font:600 11px/1 var(--font-mono);letter-spacing:.06em;text-transform:uppercase}
+.route-ends .a{color:var(--js-text)} .route-ends .b{color:var(--ts-text)}
+.btn{border:0;border-radius:10px;min-height:46px;padding:10px 18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-main{background:var(--ink);color:var(--bg)}
+.btn-ghost{background:var(--surface-2);border:1px solid var(--line)}
+.continue{justify-self:start;max-width:100%;text-align:left}
+.continue span{font-weight:400;opacity:.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.stage{margin-bottom:28px}
+.stage-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.chip{font:600 11px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;padding:6px 8px;border-radius:5px}
+.chip.js{background:var(--js);color:var(--js-ink)}
+.chip.ts{background:var(--ts);color:var(--ts-ink)}
+.stage-head h3{margin:0;font:400 19px/1.3 var(--font-display)}
+.stage-head .cnt{margin-left:auto;font:600 13px var(--font-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.lessons{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.lessons li+li{border-top:1px solid var(--line)}
+.lrow{width:100%;border:0;background:none;text-align:left;display:grid;grid-template-columns:34px 1fr 26px;gap:10px;align-items:center;padding:13px 14px;min-height:64px}
+.lrow:active{background:var(--surface-2)}
+.lnum{font:600 14px/1 var(--font-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.ltxt{min-width:0;display:grid;gap:1px}
+.ltxt b{font-size:16px;line-height:1.4}
+.ltxt span{font-size:13px;color:var(--muted);line-height:1.5}
+.lstat{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center}
+.lstat svg{width:14px;height:14px}
+.lstat.done.js{background:var(--js);border-color:var(--js);color:var(--js-ink)}
+.lstat.done.ts{background:var(--ts);border-color:var(--ts);color:var(--ts-ink)}
+.lstat.part{border-style:dashed}
+.note{font-size:13px;color:var(--muted);margin:8px 0 0}
+
+/* lesson */
+.lhead{display:grid;gap:10px;margin-bottom:18px}
+.lmeta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font:600 12px var(--font-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.lhead h1{margin:0;font:400 clamp(26px,7vw,36px)/1.25 var(--font-display);text-wrap:balance}
+.lhead p{margin:0;color:var(--muted)}
+.prose{max-width:65ch}
+.prose p{margin:0 0 14px}
+.prose ul,.prose ol{margin:0 0 14px;padding-left:1.3em}
+.prose li{margin:2px 0}
+.prose strong{font-weight:700;background:linear-gradient(transparent 62%,var(--hl,var(--js-soft)) 62%)}
+.lesson.ts .prose strong{--hl:var(--ts-soft)}
+.prose .tip{border-left:3px solid var(--muted);padding:2px 0 2px 12px;color:var(--muted);font-size:15px}
+.block{margin:0 0 22px}
+
+/* code cell */
+.cell-code{border-radius:12px;overflow:hidden;background:var(--code-bg);color:var(--code-fg)}
+.cbar{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 10px;background:var(--code-bar);min-height:46px}
+.lang{font:700 10px/1 var(--font-mono);width:24px;height:24px;border-radius:3px;display:grid;place-items:end end;padding:0 2px 2px 0;flex:none}
+.lang.js{background:var(--js);color:var(--js-ink)}
+.lang.ts{background:#3178C6;color:#fff}
+.cbar .ttl{font-size:13px;color:var(--code-muted);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cbtn{border:0;border-radius:8px;min-height:36px;padding:6px 12px;font-size:14px;font-weight:700;background:transparent;color:var(--code-muted);display:inline-flex;align-items:center;gap:6px}
+.cbtn svg{width:14px;height:14px}
+.cbtn.run{background:var(--js);color:var(--js-ink)}
+.cbtn.run.ts{background:#3178C6;color:#fff}
+.cbtn:disabled{opacity:.6}
+.ed-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ed-inner{display:grid;grid-template-columns:auto 1fr;width:max-content;min-width:100%}
+.gutter{position:sticky;left:0;z-index:1;background:var(--code-bg);color:var(--code-muted);opacity:.7;text-align:right;padding:12px 8px 12px 10px;font:400 13px/24px var(--font-mono);user-select:none;border-right:1px solid var(--code-line);font-variant-numeric:tabular-nums}
+.ed-stack{display:grid;min-width:0}
+.ed-hl,.ed-input{grid-area:1/1;margin:0;padding:12px 16px 12px 12px;font:400 16px/24px var(--font-mono);tab-size:2;white-space:pre;letter-spacing:0;border:0;font-variant-ligatures:none}
+.ed-hl{color:var(--code-fg);pointer-events:none}
+.ed-input{width:100%;height:100%;resize:none;overflow:hidden;background:transparent;color:transparent;-webkit-text-fill-color:transparent;caret-color:var(--js);outline:none}
+.ed-input::selection{background:rgba(132,201,255,.35);-webkit-text-fill-color:transparent}
+.static .ed-hl{pointer-events:auto}
+.tk-kw{color:var(--tk-kw)} .tk-str{color:var(--tk-str)} .tk-num{color:var(--tk-num)} .tk-com{color:var(--tk-com);font-style:italic} .tk-fn{color:var(--tk-fn)} .tk-type{color:var(--tk-type)}
+.keybar{display:none;gap:4px;padding:6px;background:var(--code-bar);overflow-x:auto;scrollbar-width:none}
+.keybar::-webkit-scrollbar{display:none}
+.cell-code:focus-within .keybar{display:flex}
+.key{flex:none;min-width:38px;height:38px;border:0;border-radius:7px;background:var(--code-line);color:var(--code-fg);font:600 15px/1 var(--font-mono);padding:0 8px}
+.key.wide{font-family:var(--font-body);font-size:12px}
+.out{background:var(--out-bg);border-top:1px solid var(--code-line);padding:10px 14px 12px;font:400 14px/1.6 var(--font-mono);overflow-x:auto}
+.out-label{font:600 10px/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--code-muted);margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.ln{white-space:pre-wrap;word-break:break-word}
+.ln.warn{color:var(--tk-num)}
+.ln.error,.ln.uncaught{color:#FF8A80}
+.ln.sys{color:var(--code-muted)}
+.ln .jp{display:block;font-family:var(--font-body);font-size:13px;color:#FFC4BE}
+.diag{border-left:3px solid #FF8A80;padding:4px 0 4px 10px;margin:6px 0;font-family:var(--font-body);font-size:14px;line-height:1.55}
+.diag b{color:#FFB3AC;font-family:var(--font-mono);font-size:12px;margin-right:6px}
+.diag .en{display:block;font-family:var(--font-mono);font-size:12px;color:var(--code-muted);word-break:break-word}
+.spinner{width:10px;height:10px;border-radius:50%;border:2px solid var(--code-muted);border-top-color:transparent;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* challenge */
+.challenge{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:16px;display:grid;gap:14px}
+.ch-head{display:flex;align-items:center;gap:10px}
+.ch-head h4{margin:0;font:400 18px/1.3 var(--font-display)}
+.ch-head .passed{margin-left:auto;font-size:12px;font-weight:700;color:var(--ok);display:none;align-items:center;gap:4px}
+.challenge.is-passed .passed{display:inline-flex}
+.challenge .prose p:last-child{margin-bottom:0}
+.ch-actions{display:flex;gap:8px;flex-wrap:wrap}
+.ch-actions .btn{min-height:42px;padding:8px 14px;font-size:14px}
+.verdict{border-radius:10px;padding:12px 14px;font-size:15px;display:grid;gap:6px}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)}
+.verdict.ng{background:var(--err-soft);color:var(--err)}
+.verdict.info{background:var(--surface-2);color:var(--ink)}
+.verdict b{font-weight:700}
+.verdict ul{margin:0;padding-left:1.2em;color:var(--ink)}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.cmp div{min-width:0}
+.cmp small{display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em}
+.cmp pre{margin:2px 0 0;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:400 13px/1.5 var(--font-mono);color:var(--ink);white-space:pre-wrap;word-break:break-word;max-height:220px;overflow:auto}
+
+/* quiz */
+.quiz{display:grid;gap:18px}
+.quiz h4{margin:0;font:400 18px/1.3 var(--font-display)}
+.q{display:grid;gap:8px}
+.q p{margin:0;font-weight:700}
+.opt{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:11px 14px;text-align:left;min-height:46px;display:flex;gap:10px;align-items:center;line-height:1.5}
+.opt .mk{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:12px;font-weight:700}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.right .mk{border-color:var(--ok);background:var(--ok);color:var(--surface)}
+.opt.wrong{border-color:var(--err);background:var(--err-soft);opacity:.85}
+.opt.wrong .mk{border-color:var(--err);color:var(--err)}
+.opt:disabled{cursor:default}
+.explain{font-size:14px;color:var(--muted);margin:0;padding-left:2px}
+
+.lnav{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:20px;margin-top:8px}
+.lnav .btn-main{flex:1;min-width:200px}
+
+/* playground */
+.play-head{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.play-head h1{margin:0;font:400 28px/1.2 var(--font-display)}
+.seg{display:inline-grid;grid-template-columns:1fr 1fr;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{border:0;background:none;border-radius:7px;padding:7px 16px;font:700 14px var(--font-mono);color:var(--muted)}
+.seg button[aria-pressed="true"].js{background:var(--js);color:var(--js-ink)}
+.seg button[aria-pressed="true"].ts{background:var(--ts);color:var(--ts-ink)}
+.play-tips{font-size:14px;color:var(--muted);margin:14px 0 0}
+
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="topbar"><div class="topbar-in" id="topbar"></div></header>
+<main class="app" id="app"></main>
+<nav class="tabbar" aria-label="メイン"><div class="tabbar-in">
+  <button class="tab" id="tab-course" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4z"/><path d="M20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"/></svg>コース</button>
+  <button class="tab" id="tab-play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l-5 5 5 5"/><path d="M16 7l5 5-5 5"/><path d="M13.5 5l-3 14"/></svg>練習場</button>
+</div></nav>
+
+<script type="text/x-lessons" id="lessons-src">
+=== l1 | 1 | 変数と表示 | console.log と const / let
+--- text
+JavaScript（JS）は、Webページやサーバーを動かすプログラミング言語です。まずは `console.log()` で値を表示してみましょう。下のコードは**書き換えて実行**できます。
+
+値に名前をつけて覚えておく箱が**変数**です。
+- `const` … 再代入しない変数（基本はこれ）
+- `let` … あとで値を書き換える変数
+- `var` … 古い書き方。今は使いません
+
+> 迷ったら const。書き換える必要が出たら let に変える。これが現代のJSの基本です。
+--- code js
+const name = "さくら";
+let age = 20;
+console.log(name);
+
+age = age + 1;
+console.log(age);
+console.log("名前:", name, "年齢:", age);
+--- text
+`//` から行末まではコメントで、実行されません。文の終わりの `;` は省略もできますが、このコースでは付けて書きます。
+--- challenge js
+`const` で `language` に `"JavaScript"` を、`let` で `level` に `1` を入れて、それぞれ表示しましょう。そのあと `level` を `2` に書き換えて、もう一度表示します。
+>>> starter
+// ここに書こう
+
+>>> expect
+JavaScript
+1
+2
+>>> require
+const\s+language :: language は const で宣言しよう
+let\s+level :: level は let で宣言しよう
+>>> hint
+再代入は `level = 2;` のように書きます。const の変数には再代入できません。
+>>> answer
+const language = "JavaScript";
+let level = 1;
+console.log(language);
+console.log(level);
+level = 2;
+console.log(level);
+--- quiz
+Q: あとで値を書き換えない変数に使うキーワードは？
+- let
+* const
+- var
+? 再代入しない値は const。書き換えるときだけ let を使います。
+Q: const x = 1; のあとに x = 2; を実行するとどうなる？
+* エラーになる
+- x が 2 になる
+- 何も起きず x は 1 のまま
+? const の変数に再代入すると TypeError になります。上のエディタで試して確かめてみましょう。
+
+=== l2 | 1 | データ型 | 文字列・数値・真偽値・null・undefined
+--- text
+JSの値には**型**（種類）があります。よく使うのは次の5つです。
+- `string` 文字列 … `"こんにちは"` や `'abc'`
+- `number` 数値 … `42` `3.14`（整数と小数の区別はありません）
+- `boolean` 真偽値 … `true` / `false`
+- `undefined` … まだ値が入っていない
+- `null` … 「値がない」ことを意図して表す
+
+`typeof` を使うと型を調べられます。
+--- code js
+console.log(typeof "hello");
+console.log(typeof 42);
+console.log(typeof true);
+
+let x;
+console.log(x);
+console.log(typeof x);
+console.log(typeof null); // 歴史的な理由で "object"
+--- text
+JSは型をゆるく扱うので、思わぬ自動変換が起きます。`+` は片方が文字列だと**文字列の連結**になります。
+--- code js
+console.log("10" + 5);
+console.log("10" - 5);
+console.log(Number("10") + 5);
+console.log(0.1 + 0.2);
+--- text
+> こうした「型の取り違え」によるバグを、実行する前に見つけてくれるのが TypeScript です。ステージ3で登場します。
+--- challenge js
+`price`（1200）と `quantity`（3）を掛けた合計 `total` を表示し、続けて `typeof` で `total` の型を表示しましょう。
+>>> starter
+const price = 1200;
+const quantity = 3;
+// ここから
+
+>>> expect
+3600
+number
+>>> require
+typeof :: typeof を使って型を表示しよう
+>>> answer
+const price = 1200;
+const quantity = 3;
+const total = price * quantity;
+console.log(total);
+console.log(typeof total);
+--- quiz
+Q: typeof "5" の結果は？
+* "string"
+- "number"
+- "boolean"
+? 引用符で囲まれていれば、中身が数字でも文字列です。
+Q: "3" + 4 の結果は？
+- 7
+* "34"
+- エラー
+? + は片方が文字列なら連結になります。数値として足したいなら Number("3") + 4 と書きます。
+
+=== l3 | 1 | 比較と論理 | === と && / ||、truthy と falsy
+--- text
+比較の結果は `true` か `false` になります。
+- `===` 等しい / `!==` 等しくない
+- `>` `<` `>=` `<=` 大小
+- `&&` かつ / `||` または / `!` 否定
+
+`==` は型を自動変換してから比べるので、`5 == "5"` が `true` になってしまいます。**比較は常に `===` を使う**と覚えておきましょう。
+--- code js
+console.log(5 === 5);
+console.log(5 == "5");
+console.log(5 === "5");
+console.log(3 > 1 && 2 > 5);
+console.log(3 > 1 || 2 > 5);
+console.log(!true);
+--- text
+条件の位置では、どんな値も真偽に変換されます。`false` 扱いになる値を **falsy** と呼び、`false` `0` `""` `null` `undefined` `NaN` の6つだけです。それ以外はすべて **truthy** です。
+--- code js
+console.log(Boolean(""));
+console.log(Boolean("0"));
+console.log(Boolean([]));
+console.log(0 || "デフォルト");
+console.log("値あり" && "右側");
+--- challenge js
+`score` が80以上**かつ** `attended` が `true` なら合格です。合格かどうかを表す式を `console.log` で表示しましょう。そのあと `score` を70に変えて、同じ式をもう一度表示します。
+>>> starter
+let score = 85;
+const attended = true;
+// ここから
+
+>>> expect
+true
+false
+>>> require
+&& :: && を使おう
+>=\s*80 :: 「80以上」は >= 80 で書けます
+>>> answer
+let score = 85;
+const attended = true;
+console.log(score >= 80 && attended);
+score = 70;
+console.log(score >= 80 && attended);
+--- quiz
+Q: 値の比較に基本的に使う演算子は？
+- ==
+* ===
+- =
+? = は代入、== は型変換つきの比較です。=== が安全です。
+Q: falsy では「ない」値は？
+- 0
+- ""
+* "0"
+- null
+? "0" は中身のある文字列なので truthy です。
+Q: null || "名無し" の結果は？
+* "名無し"
+- null
+- true
+? || は左が falsy なら右の値を返します。
+
+=== l4 | 1 | 条件分岐 | if / else、三項演算子、switch
+--- text
+`if` で条件によって処理を分けます。`else if` で条件を足し、どれにも当てはまらないときは `else` に進みます。
+--- code js
+const temp = 26;
+
+if (temp >= 30) {
+  console.log("真夏日");
+} else if (temp >= 20) {
+  console.log("過ごしやすい");
+} else {
+  console.log("肌寒い");
+}
+--- text
+値を1つ選ぶだけなら**三項演算子** `条件 ? A : B` が短く書けます。決まった値で分けるなら `switch` も使えます。
+--- code js
+const age = 17;
+const label = age >= 18 ? "大人" : "子ども";
+console.log(label);
+
+const day = "sat";
+switch (day) {
+  case "sat":
+  case "sun":
+    console.log("休日");
+    break;
+  default:
+    console.log("平日");
+}
+--- challenge js
+FizzBuzz の1回分を作ります。`n` が3と5の両方で割り切れれば `"FizzBuzz"`、3だけなら `"Fizz"`、5だけなら `"Buzz"`、どれでもなければ `n` を表示しましょう。割り切れるかは `n % 3 === 0` で調べられます。
+>>> starter
+const n = 15;
+// ここから
+
+>>> expect
+FizzBuzz
+>>> require
+\bif\b :: if を使おう
+% :: 余りを求める % を使おう
+>>> hint
+先に「3と5の両方」を調べないと、15 が "Fizz" になってしまいます。3と5の両方で割り切れる = 15で割り切れる、です。
+>>> answer
+const n = 15;
+if (n % 15 === 0) {
+  console.log("FizzBuzz");
+} else if (n % 3 === 0) {
+  console.log("Fizz");
+} else if (n % 5 === 0) {
+  console.log("Buzz");
+} else {
+  console.log(n);
+}
+--- quiz
+Q: const x = 10 > 5 ? "A" : "B"; の x は？
+* "A"
+- "B"
+- true
+? 条件が true なので ? の直後の値になります。
+Q: switch の case の最後に break を書き忘れると？
+- エラーになる
+* 次の case の処理まで続けて実行される
+- その case が無視される
+? フォールスルーと呼ばれる動きです。意図して使う場合以外は break を書きます。
+
+=== l5 | 1 | ループ | for / for...of / while
+--- text
+同じ処理をくり返すのがループです。
+- `for (初期化; 条件; 更新)` … 回数を決めてくり返す
+- `for (const x of 配列)` … 配列の中身を順に取り出す
+- `while (条件)` … 条件が true の間くり返す
+
+`break` でループを抜け、`continue` でその回だけ飛ばします。
+--- code js
+for (let i = 1; i <= 3; i++) {
+  console.log("回数:", i);
+}
+
+const colors = ["赤", "青", "黄"];
+for (const c of colors) {
+  console.log(c);
+}
+
+let n = 1;
+while (n < 50) {
+  n = n * 3;
+}
+console.log(n);
+--- text
+> while の条件がずっと true のままだと無限ループになります。このアプリでは5秒で自動的に止まるので、安心して試してください。
+--- challenge js
+1から15までの FizzBuzz を表示しましょう。前のレッスンの判定をループの中に入れればOKです。
+>>> starter
+for (let i = 1; i <= 15; i++) {
+  // ここに判定を書く
+}
+>>> expect
+1
+2
+Fizz
+4
+Buzz
+Fizz
+7
+8
+Fizz
+Buzz
+11
+Fizz
+13
+14
+FizzBuzz
+>>> require
+\bfor\b :: for ループを使おう
+>>> answer
+for (let i = 1; i <= 15; i++) {
+  if (i % 15 === 0) {
+    console.log("FizzBuzz");
+  } else if (i % 3 === 0) {
+    console.log("Fizz");
+  } else if (i % 5 === 0) {
+    console.log("Buzz");
+  } else {
+    console.log(i);
+  }
+}
+--- quiz
+Q: 配列の要素を順に取り出すのに向いているのは？
+- for...in
+* for...of
+- while
+? for...of は値を、for...in はキー（添字）を取り出します。配列には for...of を使います。
+Q: ループの途中で「この回だけ飛ばして次へ」進むには？
+- break
+* continue
+- return
+? break はループそのものを終了します。
+
+=== l6 | 1 | 関数 | function とアロー関数、引数と戻り値
+--- text
+処理に名前をつけて再利用できるようにしたものが**関数**です。受け取る値を**引数**、`return` で返す値を**戻り値**といいます。
+--- code js
+function greet(name) {
+  return "こんにちは、" + name + "さん";
+}
+console.log(greet("ユイ"));
+
+// アロー関数（現代のJSでよく使う書き方）
+const add = (a, b) => {
+  return a + b;
+};
+console.log(add(2, 3));
+
+// 1行で返すなら { } と return を省略できる
+const square = (x) => x * x;
+console.log(square(4));
+--- text
+引数には**デフォルト値**を付けられます。渡されなかった引数は `undefined` になります。`return` のない関数は `undefined` を返します。
+--- code js
+const hello = (name = "ゲスト") => "Hello, " + name;
+console.log(hello());
+console.log(hello("Ken"));
+
+function noReturn() {}
+console.log(noReturn());
+--- challenge js
+税込価格（10%）を返す関数 `withTax(price)` を作りましょう。小数は `Math.floor()` で切り捨てます。
+>>> starter
+// withTax を作る
+
+
+console.log(withTax(1000));
+console.log(withTax(980));
+>>> expect
+1100
+1078
+>>> require
+(const|let|function)\s+withTax :: withTax という名前で関数を作ろう
+Math\.floor :: Math.floor で切り捨てよう
+>>> answer
+const withTax = (price) => Math.floor(price * 1.1);
+
+console.log(withTax(1000));
+console.log(withTax(980));
+--- quiz
+Q: const f = (x) => x + 1; のとき f(2) は？
+* 3
+- undefined
+- "21"
+? 1行のアロー関数は、式の結果がそのまま戻り値になります。
+Q: return を書いていない関数を呼ぶと、戻り値は？
+- null
+- 0
+* undefined
+? 何も返さない関数の戻り値は undefined です。
+
+=== l7 | 1 | 配列 | 並んだデータを扱う
+--- text
+複数の値を順番に並べて持つのが**配列**です。`[ ]` で作り、`配列[番号]` で取り出します。番号（インデックス）は **0から**始まります。
+--- code js
+const fruits = ["りんご", "バナナ", "みかん"];
+console.log(fruits[0]);
+console.log(fruits.length);
+
+fruits.push("ぶどう"); // 末尾に追加
+console.log(fruits);
+
+const last = fruits.pop(); // 末尾を取り出す
+console.log(last, fruits.length);
+
+console.log(fruits.includes("バナナ"));
+console.log(fruits.indexOf("みかん"));
+console.log(fruits.join(" / "));
+--- text
+`const` で作った配列でも、中身は変えられます。`const` が禁止するのは「変数に別の配列を入れ直す」ことだけです。
+--- challenge js
+`todos` に `"買い物"` を追加し、要素数を表示しましょう。次に**最後の要素**を `todos[todos.length - 1]` で表示します。
+>>> starter
+const todos = ["掃除", "洗濯"];
+// ここから
+
+>>> expect
+3
+買い物
+>>> require
+\.push\( :: push で追加しよう
+length\s*-\s*1 :: 最後の要素は length - 1 番目です
+>>> answer
+const todos = ["掃除", "洗濯"];
+todos.push("買い物");
+console.log(todos.length);
+console.log(todos[todos.length - 1]);
+--- quiz
+Q: ["a", "b", "c"][1] は？
+- "a"
+* "b"
+- "c"
+? インデックスは0から数えます。
+Q: const arr = [1]; arr.push(2); はどうなる？
+* 問題なく arr が [1, 2] になる
+- const なのでエラー
+- arr は [1] のまま
+? const は変数への再代入を禁止するだけで、配列の中身の変更は禁止しません。
+
+=== l8 | 1 | オブジェクト | キーと値のセット
+--- text
+名前（キー）と値の組をまとめたものが**オブジェクト**です。`{ キー: 値 }` で作り、`obj.キー` で取り出します。
+--- code js
+const user = {
+  name: "ハナ",
+  age: 25,
+  hobbies: ["読書", "登山"],
+  address: { city: "札幌" },
+};
+
+console.log(user.name);
+console.log(user.hobbies[0]);
+console.log(user.address.city);
+
+user.age = 26;            // 書き換え
+user.email = "h@ex.com";  // 追加
+console.log(user.age, user.email);
+
+const key = "name";
+console.log(user[key]);   // キーを変数で指定
+console.log(Object.keys(user));
+--- text
+関数を値として持たせると**メソッド**になります。メソッドの中では `this` で自分自身を指せます。
+--- code js
+const counter = {
+  count: 0,
+  up() {
+    this.count++;
+    return this.count;
+  },
+};
+counter.up();
+console.log(counter.up());
+--- challenge js
+`book` オブジェクトを作りましょう。`title` は `"JS入門"`、`pages` は `240`、`tags` は `["プログラミング", "初心者"]` です。そのあと `title`、`tags` の2つ目、`pages` を10増やした値を順に表示します。
+>>> starter
+// book を作る
+
+
+>>> expect
+JS入門
+初心者
+250
+>>> require
+(const|let)\s+book\s*=\s*\{ :: book をオブジェクトとして作ろう
+>>> answer
+const book = {
+  title: "JS入門",
+  pages: 240,
+  tags: ["プログラミング", "初心者"],
+};
+console.log(book.title);
+console.log(book.tags[1]);
+book.pages = book.pages + 10;
+console.log(book.pages);
+--- quiz
+Q: 存在しないキー user.phone を読むと？
+- エラーになる
+* undefined
+- null
+? 存在しないプロパティは undefined です。ただし、その先の user.phone.number まで読むとエラーになります。
+Q: キー名が変数 k に入っているとき、値を読む書き方は？
+- user.k
+* user[k]
+- user->k
+? user.k と書くと "k" という名前のキーを探してしまいます。
+
+=== l9 | 2 | 配列メソッド | map・filter・reduce・find
+--- text
+実務のJSで一番よく使うのが配列のメソッドです。ループを書かずに、**関数を渡して**配列を変換します。
+- `map` … 全要素を変換した新しい配列
+- `filter` … 条件に合う要素だけの新しい配列
+- `reduce` … 全要素を1つの値にまとめる
+- `find` … 条件に合う最初の要素（なければ `undefined`）
+- `some` / `every` … 1つでも / すべてが条件に合うか
+--- code js
+const prices = [100, 250, 80, 400];
+
+const doubled = prices.map((p) => p * 2);
+console.log(doubled);
+
+const cheap = prices.filter((p) => p < 200);
+console.log(cheap);
+
+const total = prices.reduce((sum, p) => sum + p, 0);
+console.log(total);
+
+console.log(prices.find((p) => p > 200));
+console.log(prices.some((p) => p > 300));
+console.log(prices.every((p) => p > 50));
+--- text
+メソッドはつなげて書けます（メソッドチェーン）。元の配列は変更されません。
+--- code js
+const users = [
+  { name: "アオイ", age: 31 },
+  { name: "ソラ", age: 17 },
+  { name: "リン", age: 24 },
+];
+const adultNames = users
+  .filter((u) => u.age >= 20)
+  .map((u) => u.name);
+console.log(adultNames);
+--- challenge js
+`items` から100円以上の商品の名前だけを取り出して `,` でつないで表示しましょう。次に、全商品の合計金額を `reduce` で計算して表示します。
+>>> starter
+const items = [
+  { name: "ペン", price: 120 },
+  { name: "ノート", price: 300 },
+  { name: "消しゴム", price: 80 },
+];
+// ここから
+
+>>> expect
+ペン,ノート
+500
+>>> require
+\.filter\( :: filter を使おう
+\.map\( :: map を使おう
+\.reduce\( :: reduce を使おう
+>>> hint
+名前を `,` でつなぐには `配列.join(",")` を使います。
+>>> answer
+const items = [
+  { name: "ペン", price: 120 },
+  { name: "ノート", price: 300 },
+  { name: "消しゴム", price: 80 },
+];
+const names = items
+  .filter((item) => item.price >= 100)
+  .map((item) => item.name);
+console.log(names.join(","));
+
+const total = items.reduce((sum, item) => sum + item.price, 0);
+console.log(total);
+--- quiz
+Q: [1, 2, 3].map((n) => n * 10) の結果は？
+* [10, 20, 30]
+- 60
+- [1, 2, 3]
+? map は同じ長さの新しい配列を返します。
+Q: 条件に合う「最初の1つ」を取り出すメソッドは？
+- filter
+* find
+- some
+? filter は配列を、find は要素そのものを、some は true / false を返します。
+
+=== l10 | 2 | 分割代入とスプレッド | { } と [ ] で取り出す、... で広げる
+--- text
+**分割代入**を使うと、オブジェクトや配列から値をまとめて取り出せます。
+--- code js
+const user = { name: "ミオ", age: 28, city: "福岡" };
+const { name, age } = user;
+console.log(name, age);
+
+// 名前を変えて取り出す・デフォルト値
+const { city: town, country = "日本" } = user;
+console.log(town, country);
+
+const [first, second, ...rest] = [10, 20, 30, 40];
+console.log(first, second, rest);
+
+// 関数の引数でも使える
+const show = ({ name, city }) => name + "（" + city + "）";
+console.log(show(user));
+--- text
+**スプレッド構文** `...` は中身を広げます。元のデータを変えずに、コピーして一部だけ変えるときによく使います（React などでは欠かせない書き方です）。
+--- code js
+const a = [1, 2];
+const b = [...a, 3, 4];
+console.log(b);
+
+const base = { theme: "light", lang: "ja" };
+const updated = { ...base, theme: "dark" };
+console.log(base.theme, updated.theme);
+console.log(Math.max(...b));
+--- challenge js
+`point` をスプレッド構文でコピーし、`x` だけ `10` にした `moved` を作りましょう。`point.x` と `moved.x` を表示したあと、`moved` から分割代入で `y` を取り出して表示します。
+>>> starter
+const point = { x: 1, y: 2 };
+// ここから
+
+>>> expect
+1
+10
+2
+>>> require
+\.\.\.point :: ...point でコピーしよう
+\{\s*y\s*\}\s*=\s*moved :: const { y } = moved のように取り出そう
+>>> answer
+const point = { x: 1, y: 2 };
+const moved = { ...point, x: 10 };
+console.log(point.x);
+console.log(moved.x);
+const { y } = moved;
+console.log(y);
+--- quiz
+Q: const [a, ...b] = [1, 2, 3]; の b は？
+- 2
+* [2, 3]
+- [1, 2, 3]
+? ...rest は残り全部を配列で受け取ります。
+Q: { ...obj, x: 1 } と { x: 1, ...obj } の違いは？
+* 後に書いたものが優先されるので、obj に x があると結果が変わる
+- いつも同じ結果になる
+- 後者はエラーになる
+? 同じキーは後勝ちです。上書きしたい値は後ろに書きます。
+
+=== l11 | 2 | 便利な書き方 | テンプレート文字列・?.・??
+--- text
+**テンプレート文字列**はバッククォート `` ` `` で囲み、`${ }` の中に式を埋め込めます。改行もそのまま書けます。
+--- code js
+const item = "コーヒー";
+const price = 450;
+console.log(`${item}は${price}円です`);
+console.log(`税込: ${Math.floor(price * 1.1)}円`);
+--- text
+`?.`（**オプショナルチェーン**）は、途中が `null` や `undefined` ならエラーにせず `undefined` を返します。`??`（**Null合体演算子**）は、左が `null` / `undefined` のときだけ右の値を使います。
+--- code js
+const user = { name: "リク", profile: null };
+
+// console.log(user.profile.city); // ← これはエラー
+console.log(user.profile?.city);
+console.log(user.profile?.city ?? "未設定");
+
+// || との違い: 0 や "" も置き換えてしまう
+const count = 0;
+console.log(count || 10);
+console.log(count ?? 10);
+--- challenge js
+テンプレート文字列、`?.`、`??` を使って `リクさんの都市: 未設定` と表示しましょう。`user.profile` が `null` でもエラーにならないように書きます。
+>>> starter
+const user = { name: "リク", profile: null };
+// ここから
+
+>>> expect
+リクさんの都市: 未設定
+>>> require
+` :: テンプレート文字列（バッククォート）を使おう
+\?\. :: ?. を使おう
+\?\? :: ?? を使おう
+>>> answer
+const user = { name: "リク", profile: null };
+console.log(`${user.name}さんの都市: ${user.profile?.city ?? "未設定"}`);
+--- quiz
+Q: 0 ?? 5 の結果は？
+* 0
+- 5
+- null
+? ?? が反応するのは null と undefined だけ。0 はそのまま使われます。
+Q: o が undefined のとき、o?.a.b の結果は？
+- エラー
+* undefined
+- null
+? ?. の左が undefined なら、その先は評価せずに undefined を返します。
+
+=== l12 | 2 | クラス | 設計図からオブジェクトを作る
+--- text
+同じ形のオブジェクトをたくさん作るときは**クラス**を使います。`constructor` で初期化し、`new` でインスタンスを作ります。
+--- code js
+class Dog {
+  constructor(name) {
+    this.name = name;
+  }
+  bark() {
+    return `${this.name}: ワン!`;
+  }
+}
+
+const pochi = new Dog("ポチ");
+console.log(pochi.bark());
+console.log(pochi);
+--- text
+`extends` で別のクラスを**継承**して機能を足せます。親のコンストラクタは `super()` で呼びます。`#` で始まるフィールドはクラスの外から触れない**プライベート**になります。
+--- code js
+class Account {
+  #balance = 0;
+  deposit(amount) {
+    this.#balance += amount;
+  }
+  get balance() {
+    return this.#balance;
+  }
+}
+
+class SavingsAccount extends Account {
+  constructor(rate) {
+    super();
+    this.rate = rate;
+  }
+  addInterest() {
+    this.deposit(Math.floor(this.balance * this.rate));
+  }
+}
+
+const acc = new SavingsAccount(0.1);
+acc.deposit(1000);
+acc.addInterest();
+console.log(acc.balance);
+--- challenge js
+`Counter` クラスを作りましょう。`count` は0から始まり、`increment()` で1増え、`reset()` で0に戻ります。
+>>> starter
+// Counter を作る
+
+
+const c = new Counter();
+c.increment();
+c.increment();
+c.increment();
+console.log(c.count);
+c.reset();
+console.log(c.count);
+>>> expect
+3
+0
+>>> require
+class\s+Counter :: class Counter を作ろう
+>>> answer
+class Counter {
+  constructor() {
+    this.count = 0;
+  }
+  increment() {
+    this.count++;
+  }
+  reset() {
+    this.count = 0;
+  }
+}
+
+const c = new Counter();
+c.increment();
+c.increment();
+c.increment();
+console.log(c.count);
+c.reset();
+console.log(c.count);
+--- quiz
+Q: クラスからインスタンスを作るキーワードは？
+* new
+- this
+- create
+? new クラス名(引数) と書くと constructor が呼ばれます。
+Q: 子クラスの constructor で親の constructor を呼ぶには？
+- this()
+* super()
+- parent()
+? extends したクラスの constructor では、this を使う前に super() を呼ぶ必要があります。
+
+=== l13 | 2 | 非同期処理 | Promise と async / await
+--- text
+JSは「待ち時間」のある処理（通信・タイマーなど）の完了を待たずに先へ進みます。これを**非同期処理**といいます。
+--- code js
+console.log("A");
+setTimeout(() => console.log("B（0ミリ秒後）"), 0);
+console.log("C");
+--- text
+0ミリ秒でも、タイマーの処理は今の処理がすべて終わってから実行されるので、A → C → B の順になります。
+
+あとで結果が届く値を表すのが **Promise** です。`async` 関数の中で `await` を付けると、結果が届くまで待ってから次の行に進みます。
+--- code js
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function main() {
+  console.log("注文を受けました");
+  await wait(500);
+  console.log("0.5秒後: できあがり");
+  return "完了";
+}
+
+main().then((result) => console.log(result));
+--- text
+複数の処理を同時に待つときは `Promise.all`、失敗に備えるには `try / catch` を使います。実際のアプリでは `await fetch(url)` のように通信で使います（この画面では通信できないので、タイマーで代用しています）。
+--- code js
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function load(name, ms) {
+  await wait(ms);
+  return name;
+}
+
+async function main() {
+  const results = await Promise.all([
+    load("ユーザー", 300),
+    load("投稿", 200),
+  ]);
+  console.log(results);
+}
+main();
+--- challenge js
+`fetchUser(id)` は少し待ってからユーザーを返します。`main` の中で、まず `fetchUser(1)` を `await` して名前を表示し、次に `Promise.all` で2と3を同時に取得して、名前を `,` でつないで表示しましょう。
+>>> starter
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function fetchUser(id) {
+  await wait(300);
+  return { id, name: `ユーザー${id}` };
+}
+
+async function main() {
+  // ここに書く
+
+}
+
+main();
+>>> expect
+ユーザー1
+ユーザー2,ユーザー3
+>>> require
+await\s+fetchUser :: await fetchUser(1) で待とう
+Promise\.all :: Promise.all を使おう
+>>> answer
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function fetchUser(id) {
+  await wait(300);
+  return { id, name: `ユーザー${id}` };
+}
+
+async function main() {
+  const user1 = await fetchUser(1);
+  console.log(user1.name);
+
+  const users = await Promise.all([fetchUser(2), fetchUser(3)]);
+  console.log(users.map((u) => u.name).join(","));
+}
+
+main();
+--- quiz
+Q: await が使えるのはどこ？
+- どこでも
+* async 関数の中（とモジュールのトップレベル）
+- Promise の中だけ
+? 普通の関数の中で await を使うと構文エラーになります。
+Q: async function f() { return 1; } の f() が返すのは？
+- 1
+* 1 で解決される Promise
+- undefined
+? async 関数は必ず Promise を返します。値は await や then で受け取ります。
+
+=== l14 | 2 | エラー処理とモジュール | try / catch と import / export
+--- text
+問題が起きたら `throw` で**エラーを投げ**、呼び出し側で `try / catch` で受け止めます。`finally` は成功・失敗にかかわらず最後に実行されます。
+--- code js
+function divide(a, b) {
+  if (b === 0) {
+    throw new Error("0では割れません");
+  }
+  return a / b;
+}
+
+try {
+  console.log(divide(10, 2));
+  console.log(divide(1, 0));
+  console.log("ここは実行されない");
+} catch (e) {
+  console.log("エラー:", e.message);
+} finally {
+  console.log("おしまい");
+}
+--- text
+実際の開発では、コードを複数のファイルに分けて `export` / `import` でつなぎます。TypeScript のプロジェクトも同じ仕組みです（この画面では1ファイルしか実行できないので、例として読んでください）。
+--- code js norun
+// math.js
+export const PI = 3.14;
+export function area(r) {
+  return PI * r * r;
+}
+export default function hello() {
+  return "hello";
+}
+
+// main.js
+import hello, { area, PI } from "./math.js";
+console.log(area(2), hello());
+--- challenge js
+`parseAge(text)` は文字列を数値に変換し、数値にできなければ `Error` を投げます。`"30"` と `"abc"` で呼び出し、エラーは `try / catch` で受け止めて `エラー: 数字ではありません` と表示しましょう。
+>>> starter
+function parseAge(text) {
+  const n = Number(text);
+  if (Number.isNaN(n)) {
+    // ここでエラーを投げる
+  }
+  return n;
+}
+
+// ここで呼び出す
+
+>>> expect
+30
+エラー: 数字ではありません
+>>> require
+throw\s+new\s+Error :: throw new Error(...) で投げよう
+\btry\b :: try / catch で受け止めよう
+>>> answer
+function parseAge(text) {
+  const n = Number(text);
+  if (Number.isNaN(n)) {
+    throw new Error("数字ではありません");
+  }
+  return n;
+}
+
+for (const text of ["30", "abc"]) {
+  try {
+    console.log(parseAge(text));
+  } catch (e) {
+    console.log(`エラー: ${e.message}`);
+  }
+}
+--- quiz
+Q: finally ブロックが実行されるのは？
+- エラーが起きたときだけ
+- 成功したときだけ
+* どちらの場合も
+? 後片付け（読み込み中の表示を消すなど）に使います。
+Q: export default したものを import する書き方は？
+* import 好きな名前 from "./file.js"
+- import { default } from "./file.js"
+- require default "./file.js"
+? default export は { } なしで、好きな名前で受け取れます。名前付き export は { } の中に同じ名前を書きます。
+
+=== l15 | 3 | TypeScript とは | 型注釈と型推論
+--- text
+**TypeScript（TS）は、JavaScriptに「型」を足した言語**です。書いたコードは `tsc` などのツールで普通のJSに変換されて動きます。変換のときに型が合っているかをチェックし、**実行する前に**ミスを教えてくれます。
+
+変数や引数の後ろに `: 型` を書くのが**型注釈**です。
+--- code ts
+let count: number = 0;
+const title: string = "TS入門";
+let isOpen: boolean = false;
+
+count = count + 1;
+console.log(title, count, isOpen);
+--- text
+型が合わないコードは、実行する前に**型エラー**になります。下のコードを実行してエラーを読んだら、`"百円"` を `100` に直してもう一度実行してみましょう。
+--- code ts
+let price: number = 500;
+price = "百円";
+console.log(price);
+--- text
+毎回型を書く必要はありません。初期値があれば TS が型を**推論**してくれます。型注釈が欠かせないのは主に**関数の引数**です。書かないと「暗黙の any（何でもあり）」としてエラーになります（`strict` 設定の場合。実務では必ずオンにします）。
+--- code ts
+let city = "京都";      // string と推論される
+// city = 123;          // ← 外すと型エラー
+
+const nums = [1, 2, 3]; // number[] と推論される
+console.log(city, nums);
+--- challenge ts
+`double` の引数に型がないためエラーになっています。引数 `n` と戻り値に `number` 型を付けて、型エラーをなくしましょう。
+>>> starter
+function double(n) {
+  return n * 2;
+}
+
+const result = double(21);
+console.log(result);
+>>> expect
+42
+>>> require
+n\s*:\s*number :: 引数に : number を付けよう
+\)\s*:\s*number :: 戻り値の型 ): number も付けよう
+>>> answer
+function double(n: number): number {
+  return n * 2;
+}
+
+const result = double(21);
+console.log(result);
+--- quiz
+Q: TypeScript のコードが動くまでの流れは？
+- ブラウザがそのまま TS を実行する
+* JS に変換（型は消える）してから実行する
+- 専用のブラウザが必要
+? 型はチェックのためだけに使われ、変換後の JS には残りません。
+Q: let n = 10; の n の型は？
+* number（推論される）
+- any
+- 型がないのでエラー
+? 初期値から型が推論されます。あとで文字列を入れると型エラーです。
+
+=== l16 | 3 | 配列とオブジェクトの型 | number[]、タプル、オブジェクト型
+--- text
+配列の型は `要素の型[]` と書きます（`Array<number>` とも書けます）。長さと順番が決まった配列は**タプル**で表せます。
+--- code ts
+const scores: number[] = [80, 92, 75];
+const names: string[] = ["A", "B"];
+// scores.push("100"); // ← 型エラー
+
+const pair: [string, number] = ["りんご", 120];
+console.log(scores, names, pair[0]);
+--- text
+オブジェクトの型は `{ キー: 型; ... }` と書きます。`?` を付けたキーは**省略可能**、`readonly` を付けると書き換え禁止です。
+--- code ts
+const user: { readonly id: number; name: string; email?: string } = {
+  id: 1,
+  name: "タロウ",
+};
+
+user.name = "ジロウ";
+// user.id = 2;   // ← readonly なのでエラー
+// user.age = 20; // ← 型にないキーもエラー
+console.log(user);
+console.log(user.email?.toUpperCase());
+--- challenge ts
+`scores` を `number[]` 型で、`book` を `{ title: string; pages: number; author?: string }` 型で宣言しましょう（author は省略）。`book.title` と、`scores` の合計を表示します。
+>>> starter
+const scores = [80, 92, 75];
+const book = { title: "TS入門", pages: 300 };
+
+console.log(book.title);
+// scores の合計を表示
+
+>>> expect
+TS入門
+247
+>>> require
+scores\s*:\s*number\[\] :: scores に : number[] を付けよう
+author\?\s*:\s*string :: book の型に author?: string を含めよう
+>>> answer
+const scores: number[] = [80, 92, 75];
+const book: { title: string; pages: number; author?: string } = {
+  title: "TS入門",
+  pages: 300,
+};
+
+console.log(book.title);
+console.log(scores.reduce((sum, s) => sum + s, 0));
+--- quiz
+Q: 文字列の配列の型は？
+* string[]
+- [string]
+- array<string>
+? [string] は「文字列1つだけのタプル」です。Array<string> とも書けますが、A は大文字です。
+Q: { name: string; age?: number } 型に代入できないのは？
+- { name: "A" }
+- { name: "A", age: 3 }
+* { age: 3 }
+? name は必須なので省略できません。
+
+=== l17 | 3 | 関数の型 | 引数・戻り値・関数型
+--- text
+関数には**引数の型**と**戻り値の型**を書きます。何も返さない関数の戻り値は `void` です。省略可能な引数には `?` を付け、デフォルト値があれば型は推論されます。
+--- code ts
+function add(a: number, b: number): number {
+  return a + b;
+}
+
+const greet = (name: string, title?: string): string => {
+  return title ? `${title} ${name}` : name;
+};
+
+function log(message: string, level = "info"): void {
+  console.log(`[${level}] ${message}`);
+}
+
+console.log(add(1, 2));
+console.log(greet("佐藤", "Dr."));
+log("起動しました");
+// add("1", 2); // ← 型エラー
+// add(1);      // ← 引数が足りないのもエラー
+--- text
+関数そのものの型は `(引数: 型) => 戻り値の型` と書きます。コールバック関数を受け取るときに使います。
+--- code ts
+type Calc = (a: number, b: number) => number;
+
+const multiply: Calc = (a, b) => a * b; // a, b の型は推論される
+
+function repeat(times: number, fn: (i: number) => void): void {
+  for (let i = 0; i < times; i++) fn(i);
+}
+
+console.log(multiply(3, 4));
+repeat(2, (i) => console.log("回数", i));
+--- challenge ts
+関数 `applyTwice` を作りましょう。`fn`（数値を受け取って数値を返す関数）と `value`（数値）を受け取り、`fn` を2回適用した結果を返します。すべての引数と戻り値に型を付けてください。
+>>> starter
+// applyTwice を作る
+
+
+console.log(applyTwice((x) => x + 3, 10));
+console.log(applyTwice((x) => x * x, 3));
+>>> expect
+16
+81
+>>> require
+fn\s*:\s*\(\s*\w+\s*:\s*number\s*\)\s*=>\s*number :: fn の型は (n: number) => number と書こう
+value\s*:\s*number :: value に : number を付けよう
+\)\s*:\s*number\s*(\{|=>) :: 戻り値の型も付けよう
+>>> hint
+`function applyTwice(fn: (n: number) => number, value: number): number { ... }` の形です。中身は `fn(fn(value))`。
+>>> answer
+function applyTwice(fn: (n: number) => number, value: number): number {
+  return fn(fn(value));
+}
+
+console.log(applyTwice((x) => x + 3, 10));
+console.log(applyTwice((x) => x * x, 3));
+--- quiz
+Q: 何も返さない関数の戻り値の型は？
+- null
+* void
+- undefined[]
+? console.log するだけ、のような関数は void です。
+Q: (s: string) => number が表すのは？
+* 文字列を受け取って数値を返す関数
+- 文字列か数値
+- 数値を受け取って文字列を返す関数
+? 矢印の左が引数、右が戻り値です。
+
+=== l18 | 3 | interface と type | 型に名前をつける
+--- text
+同じ型を何度も書くのは大変なので、**名前をつけて**再利用します。方法は2つあります。
+--- code ts
+interface User {
+  id: number;
+  name: string;
+  email?: string;
+}
+
+type Point = { x: number; y: number };
+
+const u: User = { id: 1, name: "ケン" };
+const p: Point = { x: 3, y: 4 };
+
+function describe(user: User): string {
+  return `#${user.id} ${user.name}`;
+}
+console.log(describe(u), p);
+--- text
+`interface` は `extends` で拡張でき、`type` は `&`（交差型）で合成できます。`type` はオブジェクト以外（ユニオン型など）にも名前を付けられます。
+
+> 使い分けの目安は「オブジェクトの形は interface、それ以外は type」。チームの方針があればそれに合わせればOKです。
+--- code ts
+interface Animal {
+  name: string;
+}
+interface Dog extends Animal {
+  breed: string;
+}
+
+type Timestamps = { createdAt: string };
+type Post = { title: string } & Timestamps;
+
+const d: Dog = { name: "ポチ", breed: "柴" };
+const post: Post = { title: "日記", createdAt: "2026-10-26" };
+console.log(d.breed, post.createdAt);
+--- challenge ts
+`interface Product`（`id: number`、`name: string`、`price: number`）を定義し、`Product` を受け取って `"名前: 価格円"` を返す関数 `formatProduct` を作りましょう。
+>>> starter
+// Product と formatProduct を作る
+
+
+const mug = { id: 1, name: "マグカップ", price: 1500 };
+console.log(formatProduct(mug));
+>>> expect
+マグカップ: 1500円
+>>> require
+interface\s+Product :: interface Product を定義しよう
+\w+\s*:\s*Product\b :: 引数の型に Product を使おう
+>>> answer
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+}
+
+function formatProduct(p: Product): string {
+  return `${p.name}: ${p.price}円`;
+}
+
+const mug = { id: 1, name: "マグカップ", price: 1500 };
+console.log(formatProduct(mug));
+--- quiz
+Q: interface を拡張するキーワードは？
+* extends
+- implements
+- &
+? & は type で使う交差型です。implements はクラスが interface を満たすことを示すときに使います。
+Q: type Status = "on" | "off" のような定義ができるのは？
+- interface だけ
+* type だけ
+- どちらでも
+? interface はオブジェクトの形しか定義できません。ユニオン型などには type を使います。
+
+=== l19 | 3 | ユニオン型と絞り込み | string | number と typeof
+--- text
+`A | B` は「A または B」を表す**ユニオン型**です。ユニオン型の値は、そのままでは**両方に共通する操作**しかできません。`typeof` や `if` で型を**絞り込む**と、それぞれの型として扱えます。
+--- code ts
+function printId(id: string | number): void {
+  // console.log(id.toUpperCase()); // ← number かもしれないのでエラー
+  if (typeof id === "string") {
+    console.log(id.toUpperCase()); // ここでは string
+  } else {
+    console.log(id.toFixed(1));    // ここでは number
+  }
+}
+printId("abc");
+printId(42);
+--- text
+TSで特に大事なのが `null` / `undefined` のチェックです。`find` は見つからないと `undefined` を返すので、確認しないと使えません。これだけで「Cannot read properties of undefined」という実行時エラーを大量に防げます。
+--- code ts
+const users = [
+  { id: 1, name: "アヤ" },
+  { id: 2, name: "ユウ" },
+];
+
+const found = users.find((u) => u.id === 3);
+// console.log(found.name); // ← undefined かもしれないのでエラー
+
+if (found) {
+  console.log(found.name);
+} else {
+  console.log("見つかりません");
+}
+console.log(found?.name ?? "なし");
+--- challenge ts
+`formatId(id: string | number): string` を完成させましょう。数値なら `No.7` のように先頭に `No.` を付け、文字列なら大文字にして返します。
+>>> starter
+function formatId(id: string | number): string {
+  return id.toUpperCase();
+}
+
+console.log(formatId(7));
+console.log(formatId("ab"));
+>>> expect
+No.7
+AB
+>>> require
+typeof :: typeof で絞り込もう
+>>> answer
+function formatId(id: string | number): string {
+  if (typeof id === "number") {
+    return `No.${id}`;
+  }
+  return id.toUpperCase();
+}
+
+console.log(formatId(7));
+console.log(formatId("ab"));
+--- quiz
+Q: let v: string | null の v に、そのまま v.length と書くと？
+* 型エラー（null かもしれない）
+- 問題なく使える
+- 実行時に必ずエラー
+? if (v) や v?.length で null を除外してから使います。
+Q: if (typeof x === "string") の中で x の型は？
+* string に絞り込まれる
+- 元のユニオン型のまま
+- any になる
+? TS は条件分岐を読んで、ブロックの中の型を自動で狭めてくれます。
+
+=== l20 | 3 | リテラル型と判別ユニオン | 決まった値だけを許す
+--- text
+`"success"` のような**特定の値そのもの**も型になります（**リテラル型**）。ユニオンと組み合わせると、「この中のどれか」だけを許す型が作れます。つづりミスはすぐ型エラーになります。
+--- code ts
+type Status = "loading" | "success" | "error";
+
+let status: Status = "loading";
+status = "success";
+// status = "sucess"; // ← つづりミスは型エラー
+
+function badge(s: Status): string {
+  switch (s) {
+    case "loading": return "読み込み中…";
+    case "success": return "完了";
+    case "error": return "失敗";
+  }
+}
+console.log(badge(status));
+--- text
+共通のキー（ここでは `ok` や `kind`）で種類を区別するユニオンを**判別可能なユニオン**と呼びます。そのキーをチェックすると、その種類にしかないプロパティが使えるようになります。実務のデータ設計の定番です。
+--- code ts
+type Result =
+  | { ok: true; value: number }
+  | { ok: false; error: string };
+
+function show(r: Result): string {
+  if (r.ok) {
+    return `値: ${r.value}`;   // ここでは value が使える
+  }
+  return `エラー: ${r.error}`; // ここでは error が使える
+}
+
+console.log(show({ ok: true, value: 42 }));
+console.log(show({ ok: false, error: "通信失敗" }));
+--- challenge ts
+`Shape` は円か長方形です。`area(s: Shape): number` を完成させ、`kind` で分岐して面積を返しましょう（円は `Math.PI * r * r`）。
+>>> starter
+type Shape =
+  | { kind: "circle"; radius: number }
+  | { kind: "rect"; width: number; height: number };
+
+function area(s: Shape): number {
+  // kind で分岐する
+  return 0;
+}
+
+console.log(area({ kind: "rect", width: 3, height: 4 }));
+console.log(area({ kind: "circle", radius: 2 }).toFixed(2));
+>>> expect
+12
+12.57
+>>> require
+\.kind :: s.kind で分岐しよう
+>>> answer
+type Shape =
+  | { kind: "circle"; radius: number }
+  | { kind: "rect"; width: number; height: number };
+
+function area(s: Shape): number {
+  switch (s.kind) {
+    case "circle":
+      return Math.PI * s.radius * s.radius;
+    case "rect":
+      return s.width * s.height;
+  }
+}
+
+console.log(area({ kind: "rect", width: 3, height: 4 }));
+console.log(area({ kind: "circle", radius: 2 }).toFixed(2));
+--- quiz
+Q: type Dir = "up" | "down" の変数に "left" を代入すると？
+- 代入できる
+* 型エラー
+- "up" に変換される
+? リテラル型のユニオンは、列挙した値しか許しません。
+Q: 判別可能なユニオンで種類を見分けるのに使うのは？
+* 共通のキー（kind など）の値
+- instanceof
+- プロパティの数
+? kind のような共通キーにリテラル型を持たせるのがポイントです。
+
+=== l21 | 3 | ジェネリクス | 型を引数のように受け取る
+--- text
+「どんな型でも使えるけれど、入力と出力の型は対応させたい」ときに使うのが**ジェネリクス**です。`<T>` は**型の引数**で、呼び出すときに実際の型が入ります。
+--- code ts
+function first<T>(items: T[]): T | undefined {
+  return items[0];
+}
+
+const n = first([10, 20]);   // T は number
+const s = first(["a", "b"]); // T は string
+console.log(n, s);
+// any を使うと、戻り値の型の情報が失われてしまう
+--- text
+型にもジェネリクスを使えます。APIのレスポンスのように「外側の形は同じで中身が違う」データでよく使います。`extends` で「こういう型に限る」という**制約**も付けられます。
+--- code ts
+interface ApiResponse<T> {
+  ok: boolean;
+  data: T;
+}
+
+const res: ApiResponse<string[]> = { ok: true, data: ["a", "b"] };
+console.log(res.data.length);
+
+function longest<T extends { length: number }>(a: T, b: T): T {
+  return a.length >= b.length ? a : b;
+}
+console.log(longest("abc", "de"));
+console.log(longest([1, 2], [1, 2, 3]));
+--- challenge ts
+配列の最後の要素を返すジェネリック関数 `last<T>` を作りましょう。空の配列なら `undefined` を返します（戻り値の型は `T | undefined`）。
+>>> starter
+// last を作る
+
+
+console.log(last(["a", "b", "c"]));
+console.log(last([1, 2, 3]));
+console.log(last([]));
+>>> expect
+c
+3
+undefined
+>>> require
+last\s*<\s*T\s*> :: last<T> と書こう
+T\s*\|\s*undefined :: 戻り値の型は T | undefined
+>>> answer
+function last<T>(items: T[]): T | undefined {
+  return items[items.length - 1];
+}
+
+console.log(last(["a", "b", "c"]));
+console.log(last([1, 2, 3]));
+console.log(last([]));
+--- quiz
+Q: function id<T>(x: T): T に id(5) と渡すと、戻り値の型は？
+* number
+- T
+- any
+? 引数から T = number と推論されます。
+Q: <T extends { length: number }> の意味は？
+- T は number 型
+* T は length プロパティを持つ型に限る
+- T は配列を継承する
+? extends はここでは制約です。string や配列は length を持つので使えますが、number は使えません。
+
+=== l22 | 3 | ユーティリティ型 | Partial・Pick・Omit・Record
+--- text
+TSには、既存の型から新しい型を作る**ユーティリティ型**が用意されています。よく使うものを押さえましょう。
+- `Partial<T>` … すべてのキーを省略可能に
+- `Required<T>` … すべてのキーを必須に
+- `Pick<T, "a" | "b">` … 指定したキーだけ残す
+- `Omit<T, "a">` … 指定したキーを除く
+- `Readonly<T>` … すべて書き換え禁止
+- `Record<K, V>` … キーが K、値が V のオブジェクト
+--- code ts
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+type UserPreview = Pick<User, "id" | "name">;
+type NewUser = Omit<User, "id">;
+
+const preview: UserPreview = { id: 1, name: "ナオ" };
+const draft: NewUser = { name: "ナオ", email: "nao@ex.com" };
+
+const roles: Record<string, number> = { admin: 3, guest: 1 };
+
+type UserKey = keyof User; // "id" | "name" | "email"
+const key: UserKey = "email";
+console.log(preview, draft.email, roles.admin, key);
+--- challenge ts
+`updateTodo(todo, changes)` を完成させましょう。`changes` は `Todo` のキーを**一部だけ**持つオブジェクトです。`Partial` で型を付け、スプレッド構文で新しい Todo を返します。
+>>> starter
+interface Todo {
+  id: number;
+  title: string;
+  done: boolean;
+}
+
+function updateTodo(todo: Todo, changes) {
+  // ここを書く
+}
+
+const todo: Todo = { id: 1, title: "牛乳を買う", done: false };
+const updated = updateTodo(todo, { done: true });
+console.log(updated.done);
+console.log(updated.title);
+>>> expect
+true
+牛乳を買う
+>>> require
+Partial\s*<\s*Todo\s*> :: changes の型に Partial<Todo> を使おう
+\.\.\.todo :: スプレッド構文 ...todo でコピーしよう
+>>> answer
+interface Todo {
+  id: number;
+  title: string;
+  done: boolean;
+}
+
+function updateTodo(todo: Todo, changes: Partial<Todo>): Todo {
+  return { ...todo, ...changes };
+}
+
+const todo: Todo = { id: 1, title: "牛乳を買う", done: false };
+const updated = updateTodo(todo, { done: true });
+console.log(updated.done);
+console.log(updated.title);
+--- quiz
+Q: Omit<User, "email"> は？
+* User から email を除いた型
+- email だけの型
+- email を省略可能にした型
+? Pick は「残す」、Omit は「除く」です。
+Q: keyof { a: number; b: string } は？
+- number | string
+* "a" | "b"
+- string[]
+? keyof はキー名のユニオン型を作ります。
+
+=== l23 | 3 | 総仕上げ | JSのコードをTSに書き換える
+--- text
+最後に、型のないJSのコードを、型安全なTSに書き換えてみましょう。実務でTSに移行するときも、まさにこの作業をします。
+
+1. データの形に `interface` や `type` で名前を付ける
+2. 関数の引数と戻り値に型を付ける
+3. 省略できる引数には `?` を付け、使う前に存在をチェックする
+
+> 型エラーのメッセージを読むのが上達の近道です。「何がどの型で」「どの型が期待されているか」を見ましょう。
+--- challenge ts
+`calcTotal` に型を付けて、型エラーを0にしましょう。`CartItem` と `Coupon` の型を作り、`coupon` は省略可能な引数にします。
+>>> starter
+function calcTotal(items, coupon) {
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.price * item.qty,
+    0
+  );
+  if (coupon) {
+    return subtotal - coupon.discount;
+  }
+  return subtotal;
+}
+
+const cart = [
+  { name: "Tシャツ", price: 2000, qty: 2 },
+  { name: "靴下", price: 500, qty: 3 },
+];
+
+console.log(calcTotal(cart));
+console.log(calcTotal(cart, { code: "SALE", discount: 1000 }));
+>>> expect
+5500
+4500
+>>> require
+(interface|type)\s+CartItem :: CartItem の型を作ろう
+(interface|type)\s+Coupon :: Coupon の型を作ろう
+coupon\?\s*: :: coupon を省略可能（coupon?: Coupon）にしよう
+>>> hint
+`items: CartItem[]` と書けば、`reduce` の中の `item` の型も自動で決まります。合計は初期値 `0` から number と推論されます。
+>>> answer
+interface CartItem {
+  name: string;
+  price: number;
+  qty: number;
+}
+
+interface Coupon {
+  code: string;
+  discount: number;
+}
+
+function calcTotal(items: CartItem[], coupon?: Coupon): number {
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.price * item.qty,
+    0
+  );
+  if (coupon) {
+    return subtotal - coupon.discount;
+  }
+  return subtotal;
+}
+
+const cart: CartItem[] = [
+  { name: "Tシャツ", price: 2000, qty: 2 },
+  { name: "靴下", price: 500, qty: 3 },
+];
+
+console.log(calcTotal(cart));
+console.log(calcTotal(cart, { code: "SALE", discount: 1000 }));
+--- text
+**おつかれさまでした。** ここまでできれば、TypeScript を書き始める準備は整っています。次のステップの例です。
+- パソコンに Node.js を入れ、`npx tsc --init` でプロジェクトを作る（`strict: true` を確認）
+- `npm create vite@latest` で React + TypeScript のテンプレートを作り、小さなアプリを作る
+- 手元の小さなJSのスクリプトを1つ、TSに書き換えてみる
+</script>
+
+<script type="text/plain" id="lib-dts">
+interface Object { constructor: Function; toString(): string; hasOwnProperty(v: string): boolean; }
+interface ObjectConstructor {
+  keys(o: object): string[];
+  values<T>(o: { [s: string]: T }): T[];
+  values(o: {}): any[];
+  entries<T>(o: { [s: string]: T }): [string, T][];
+  entries(o: {}): [string, any][];
+  assign<T extends {}, U>(target: T, source: U): T & U;
+  freeze<T>(o: T): Readonly<T>;
+}
+declare var Object: ObjectConstructor;
+interface Function { apply(this: Function, thisArg: any, args?: any): any; call(this: Function, thisArg: any, ...args: any[]): any; bind(this: Function, thisArg: any, ...args: any[]): any; readonly name: string; }
+interface CallableFunction extends Function {}
+interface NewableFunction extends Function {}
+interface IArguments { [index: number]: any; length: number; }
+interface RegExp { test(s: string): boolean; }
+interface Boolean {}
+interface BooleanConstructor { (value?: unknown): boolean; }
+declare var Boolean: BooleanConstructor;
+interface Number { toFixed(digits?: number): string; toString(radix?: number): string; }
+interface NumberConstructor { (value?: any): number; isNaN(n: unknown): boolean; isInteger(n: unknown): boolean; readonly MAX_SAFE_INTEGER: number; }
+declare var Number: NumberConstructor;
+declare var NaN: number;
+declare var Infinity: number;
+declare function parseInt(s: string, radix?: number): number;
+declare function parseFloat(s: string): number;
+declare function isNaN(n: number): boolean;
+interface String {
+  readonly length: number;
+  readonly [index: number]: string;
+  toUpperCase(): string; toLowerCase(): string; trim(): string;
+  includes(s: string, position?: number): boolean;
+  startsWith(s: string): boolean; endsWith(s: string): boolean;
+  split(separator: string | RegExp, limit?: number): string[];
+  slice(start?: number, end?: number): string;
+  padStart(maxLength: number, fill?: string): string;
+  padEnd(maxLength: number, fill?: string): string;
+  repeat(count: number): string;
+  replace(search: string | RegExp, replacement: string): string;
+  charAt(i: number): string;
+  indexOf(s: string): number;
+}
+interface StringConstructor { (value?: any): string; }
+declare var String: StringConstructor;
+interface ArrayLike<T> { readonly length: number; readonly [n: number]: T; }
+interface ReadonlyArray<T> {
+  readonly length: number;
+  readonly [n: number]: T;
+  map<U>(fn: (value: T, index: number, array: readonly T[]) => U): U[];
+  filter(fn: (value: T, index: number, array: readonly T[]) => unknown): T[];
+  forEach(fn: (value: T, index: number, array: readonly T[]) => void): void;
+  find(fn: (value: T, index: number, array: readonly T[]) => unknown): T | undefined;
+  includes(x: T): boolean;
+  indexOf(x: T): number;
+  join(sep?: string): string;
+  slice(start?: number, end?: number): T[];
+  some(fn: (value: T, index: number) => unknown): boolean;
+  every(fn: (value: T, index: number) => unknown): boolean;
+}
+interface Array<T> {
+  length: number;
+  [n: number]: T;
+  push(...items: T[]): number;
+  pop(): T | undefined;
+  shift(): T | undefined;
+  unshift(...items: T[]): number;
+  map<U>(fn: (value: T, index: number, array: T[]) => U): U[];
+  filter<S extends T>(fn: (value: T, index: number, array: T[]) => value is S): S[];
+  filter(fn: (value: T, index: number, array: T[]) => unknown): T[];
+  reduce(fn: (acc: T, value: T, index: number, array: T[]) => T): T;
+  reduce(fn: (acc: T, value: T, index: number, array: T[]) => T, initial: T): T;
+  reduce<U>(fn: (acc: U, value: T, index: number, array: T[]) => U, initial: U): U;
+  forEach(fn: (value: T, index: number, array: T[]) => void): void;
+  find<S extends T>(fn: (value: T, index: number, array: T[]) => value is S): S | undefined;
+  find(fn: (value: T, index: number, array: T[]) => unknown): T | undefined;
+  findIndex(fn: (value: T, index: number, array: T[]) => unknown): number;
+  some(fn: (value: T, index: number, array: T[]) => unknown): boolean;
+  every(fn: (value: T, index: number, array: T[]) => unknown): boolean;
+  includes(x: T): boolean;
+  indexOf(x: T): number;
+  join(sep?: string): string;
+  slice(start?: number, end?: number): T[];
+  splice(start: number, deleteCount?: number, ...items: T[]): T[];
+  concat(...items: (T | T[])[]): T[];
+  sort(compare?: (a: T, b: T) => number): this;
+  reverse(): T[];
+}
+interface ArrayConstructor {
+  isArray(a: any): a is any[];
+  from<T>(arrayLike: ArrayLike<T>): T[];
+  from<U>(arrayLike: { length: number }, fn: (v: unknown, i: number) => U): U[];
+  of<T>(...items: T[]): T[];
+}
+declare var Array: ArrayConstructor;
+interface TemplateStringsArray extends ReadonlyArray<string> { readonly raw: readonly string[]; }
+interface Math {
+  readonly PI: number;
+  floor(x: number): number; ceil(x: number): number; round(x: number): number; abs(x: number): number;
+  max(...values: number[]): number; min(...values: number[]): number;
+  random(): number; sqrt(x: number): number; pow(x: number, y: number): number; trunc(x: number): number;
+}
+declare var Math: Math;
+interface JSON { parse(text: string): any; stringify(value: any, replacer?: any, space?: string | number): string; }
+declare var JSON: JSON;
+interface Console { log(...data: any[]): void; info(...data: any[]): void; warn(...data: any[]): void; error(...data: any[]): void; table(data: any): void; }
+declare var console: Console;
+interface Date { getFullYear(): number; getMonth(): number; getDate(): number; getDay(): number; getHours(): number; getMinutes(): number; getTime(): number; toISOString(): string; }
+interface DateConstructor { new (value?: number | string): Date; now(): number; }
+declare var Date: DateConstructor;
+interface Error { name: string; message: string; stack?: string; }
+interface ErrorConstructor { new (message?: string): Error; (message?: string): Error; readonly prototype: Error; }
+declare var Error: ErrorConstructor;
+declare var TypeError: ErrorConstructor;
+declare var RangeError: ErrorConstructor;
+interface PromiseLike<T> {
+  then<R1 = T, R2 = never>(onfulfilled?: ((value: T) => R1 | PromiseLike<R1>) | null, onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | null): PromiseLike<R1 | R2>;
+}
+interface Promise<T> {
+  then<R1 = T, R2 = never>(onfulfilled?: ((value: T) => R1 | PromiseLike<R1>) | null, onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | null): Promise<R1 | R2>;
+  catch<R = never>(onrejected?: ((reason: any) => R | PromiseLike<R>) | null): Promise<T | R>;
+  finally(onfinally?: (() => void) | null): Promise<T>;
+}
+type Awaited<T> = T extends null | undefined ? T : T extends object & { then(onfulfilled: infer F, ...args: infer _): any } ? F extends ((value: infer V, ...args: infer _) => any) ? Awaited<V> : never : T;
+interface PromiseConstructor {
+  readonly prototype: Promise<any>;
+  new <T>(executor: (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void): Promise<T>;
+  all<T extends readonly unknown[] | []>(values: T): Promise<{ -readonly [P in keyof T]: Awaited<T[P]> }>;
+  race<T extends readonly unknown[] | []>(values: T): Promise<Awaited<T[number]>>;
+  resolve(): Promise<void>;
+  resolve<T>(value: T): Promise<Awaited<T>>;
+  reject<T = never>(reason?: any): Promise<T>;
+}
+declare var Promise: PromiseConstructor;
+declare function setTimeout(handler: (...args: any[]) => void, timeout?: number, ...args: any[]): number;
+declare function clearTimeout(id?: number): void;
+declare function setInterval(handler: (...args: any[]) => void, timeout?: number, ...args: any[]): number;
+declare function clearInterval(id?: number): void;
+interface Map<K, V> { get(key: K): V | undefined; set(key: K, value: V): this; has(key: K): boolean; delete(key: K): boolean; clear(): void; readonly size: number; forEach(fn: (value: V, key: K) => void): void; }
+interface MapConstructor { new <K, V>(entries?: readonly (readonly [K, V])[] | null): Map<K, V>; }
+declare var Map: MapConstructor;
+interface Set<T> { add(value: T): this; has(value: T): boolean; delete(value: T): boolean; clear(): void; readonly size: number; forEach(fn: (value: T) => void): void; }
+interface SetConstructor { new <T>(values?: readonly T[] | null): Set<T>; }
+declare var Set: SetConstructor;
+type Partial<T> = { [P in keyof T]?: T[P] };
+type Required<T> = { [P in keyof T]-?: T[P] };
+type Readonly<T> = { readonly [P in keyof T]: T[P] };
+type Pick<T, K extends keyof T> = { [P in K]: T[P] };
+type Record<K extends keyof any, T> = { [P in K]: T };
+type Exclude<T, U> = T extends U ? never : T;
+type Extract<T, U> = T extends U ? T : never;
+type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
+type NonNullable<T> = T & {};
+type Parameters<T extends (...args: any) => any> = T extends (...args: infer P) => any ? P : never;
+type ReturnType<T extends (...args: any) => any> = T extends (...args: any) => infer R ? R : any;
+</script>
+
+<script>
+/* ===== lesson parser ===== */
+/*@parser*/
+function parseLessons(src) {
+  const lessons = [];
+  let L = null, block = null, sub = 'main';
+  for (const raw of src.split('\n')) {
+    const line = raw.replace(/\r$/, '');
+    let m;
+    if ((m = line.match(/^=== (.*)$/))) {
+      const [id, stage, title, summary] = m[1].split(' | ').map(s => s.trim());
+      L = { id, stage: +stage, title, summary, blocks: [] };
+      lessons.push(L); block = null; continue;
+    }
+    if (!L) continue;
+    if ((m = line.match(/^--- (\w+)(?: (.*))?$/))) {
+      const args = (m[2] || '').split(/\s+/).filter(Boolean);
+      block = { type: m[1], lang: args[0] || 'js', flags: args.slice(1), lines: [], parts: {} };
+      sub = 'main'; L.blocks.push(block); continue;
+    }
+    if (!block) continue;
+    if ((m = line.match(/^>>> (\w+)$/))) { sub = m[1]; block.parts[sub] = []; continue; }
+    (sub === 'main' ? block.lines : block.parts[sub]).push(line);
+  }
+  const trim = arr => { const a = arr.slice(); while (a.length && !a[0].trim()) a.shift(); while (a.length && !a[a.length - 1].trim()) a.pop(); return a; };
+  for (const l of lessons) for (const b of l.blocks) {
+    b.lines = trim(b.lines);
+    for (const k in b.parts) b.parts[k] = trim(b.parts[k]);
+    if (b.type === 'challenge') {
+      b.prompt = b.lines.join('\n');
+      b.starter = (b.parts.starter || []).join('\n') + '\n';
+      b.expect = (b.parts.expect || []).join('\n');
+      b.require = (b.parts.require || []).map(r => { const i = r.lastIndexOf(' :: '); return { re: r.slice(0, i), msg: r.slice(i + 4) }; });
+      b.hint = (b.parts.hint || []).join('\n');
+      b.answer = (b.parts.answer || []).join('\n') + '\n';
+    }
+    if (b.type === 'quiz') {
+      b.qs = [];
+      for (const ln of b.lines) {
+        if (ln.startsWith('Q: ')) b.qs.push({ q: ln.slice(3), opts: [], answer: -1, why: '' });
+        else if (ln.startsWith('- ') || ln.startsWith('* ')) { const q = b.qs[b.qs.length - 1]; if (ln[0] === '*') q.answer = q.opts.length; q.opts.push(ln.slice(2)); }
+        else if (ln.startsWith('? ')) b.qs[b.qs.length - 1].why = ln.slice(2);
+      }
+    }
+  }
+  return lessons;
+}
+/*@endparser*/
+
+/* ===== sandboxed runner (Web Worker) ===== */
+/*@worker*/
+function workerMain() {
+  const _st = self.setTimeout.bind(self), _ct = self.clearTimeout.bind(self), _si = self.setInterval.bind(self), _ci = self.clearInterval.bind(self);
+  const timers = new Set();
+  let mainDone = false, sentDone = false;
+  const IDENT = /^[A-Za-z_$][\w$]*$/;
+  function fmt(v, depth, top, seen) {
+    if (typeof v === 'string') return top ? v : "'" + v.replace(/'/g, "\\'") + "'";
+    if (v === null) return 'null';
+    if (v === undefined) return 'undefined';
+    if (typeof v === 'number') return Object.is(v, -0) ? '-0' : String(v);
+    if (typeof v === 'bigint') return v + 'n';
+    if (typeof v === 'boolean' || typeof v === 'symbol') return String(v);
+    if (typeof v === 'function') { const s = Function.prototype.toString.call(v); return s.startsWith('class') ? '[class ' + (v.name || '(anonymous)') + ']' : '[Function: ' + (v.name || '(anonymous)') + ']'; }
+    if (v instanceof Error) return v.name + ': ' + v.message;
+    if (seen.has(v)) return '[Circular]';
+    if (depth > 3) return Array.isArray(v) ? '[Array]' : '[Object]';
+    seen.add(v);
+    let out;
+    const sub = x => fmt(x, depth + 1, false, seen);
+    if (Array.isArray(v)) out = v.length ? '[ ' + v.map(sub).join(', ') + ' ]' : '[]';
+    else if (v instanceof Map) out = 'Map(' + v.size + ') {' + (v.size ? ' ' + [...v].map(([k, x]) => sub(k) + ' => ' + sub(x)).join(', ') + ' ' : '') + '}';
+    else if (v instanceof Set) out = 'Set(' + v.size + ') {' + (v.size ? ' ' + [...v].map(sub).join(', ') + ' ' : '') + '}';
+    else if (v instanceof Promise) out = 'Promise { <pending> }';
+    else if (v instanceof Date) out = v.toISOString();
+    else {
+      const keys = Object.keys(v);
+      const proto = Object.getPrototypeOf(v);
+      const name = proto && proto !== Object.prototype && proto.constructor && proto.constructor.name ? proto.constructor.name + ' ' : (proto === null ? '[Object: null prototype] ' : '');
+      out = keys.length ? name + '{ ' + keys.map(k => (IDENT.test(k) ? k : "'" + k + "'") + ': ' + sub(v[k])).join(', ') + ' }' : name + '{}';
+    }
+    seen.delete(v);
+    return out;
+  }
+  const send = (type, args) => postMessage({ type, text: args.map(a => fmt(a, 0, true, new Set())).join(' ') });
+  const report = (e) => postMessage({ type: 'uncaught', text: (e && typeof e === 'object' && 'message' in e) ? (e.name || 'Error') + ': ' + e.message : 'Uncaught ' + fmt(e, 0, false, new Set()) });
+  const con = {
+    log: (...a) => send('log', a), info: (...a) => send('log', a), debug: (...a) => send('log', a),
+    warn: (...a) => send('warn', a), error: (...a) => send('error', a), table: (...a) => send('log', a),
+  };
+  const check = () => _st(() => { if (mainDone && !sentDone && timers.size === 0) { sentDone = true; postMessage({ type: 'done' }); } }, 0);
+  const st = (fn, ms, ...args) => { const id = _st(() => { timers.delete(id); try { if (typeof fn === 'function') fn(...args); } catch (e) { report(e); } check(); }, ms); timers.add(id); return id; };
+  const ct = (id) => { if (timers.has(id)) { timers.delete(id); _ct(id); check(); } };
+  const si = (fn, ms, ...args) => { const id = _si(() => { try { fn(...args); } catch (e) { report(e); } }, ms); timers.add(id); return id; };
+  const ci = (id) => { if (timers.has(id)) { timers.delete(id); _ci(id); check(); } };
+  self.addEventListener('unhandledrejection', (e) => { e.preventDefault(); report(e.reason); });
+  self.onmessage = async (e) => {
+    const AF = Object.getPrototypeOf(async function () {}).constructor;
+    let fn;
+    try { fn = new AF('console', 'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', e.data.code); }
+    catch (err) { report(err); mainDone = true; check(); return; }
+    try { await fn(con, st, ct, si, ci); } catch (err) { report(err); }
+    mainDone = true; check();
+  };
+}
+/*@endworker*/
+
+let workerURL = null;
+function runJS(code, onLine) {
+  if (!workerURL) workerURL = URL.createObjectURL(new Blob(['(' + workerMain.toString() + ')()'], { type: 'text/javascript' }));
+  return new Promise((resolve) => {
+    const w = new Worker(workerURL);
+    const lines = [];
+    let finished = false;
+    const finish = () => { finished = true; clearTimeout(t); w.terminate(); resolve(lines); };
+    const push = (l) => { lines.push(l); onLine && onLine(l); };
+    const t = setTimeout(() => { if (!finished) { push({ type: 'uncaught', text: '5秒以内に終わらなかったので止めました（無限ループになっていませんか？）' }); finish(); } }, 5000);
+    w.onmessage = (e) => { if (finished) return; if (e.data.type === 'done') return finish(); push(e.data); };
+    w.onerror = (e) => { e.preventDefault(); if (!finished) { push({ type: 'uncaught', text: e.message || 'エラー' }); finish(); } };
+    w.postMessage({ code });
+  });
+}
+
+/* ===== TypeScript ===== */
+const TS_URLS = [
+  'https://cdn.jsdelivr.net/npm/typescript@5.4.5/lib/typescript.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/typescript/5.4.5/typescript.min.js',
+  'https://unpkg.com/typescript@5.4.5/lib/typescript.js',
+];
+let tsPromise = null;
+function loadScript(src) {
+  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.async = true; s.onload = res; s.onerror = () => { s.remove(); rej(new Error('load failed')); }; document.head.appendChild(s); });
+}
+function loadTS() {
+  if (window.ts && window.ts.createProgram) return Promise.resolve(window.ts);
+  if (!tsPromise) {
+    tsPromise = TS_URLS.reduce((p, url) => p.catch(() => loadScript(url).then(() => { if (!window.ts) throw new Error('no ts'); })), Promise.reject())
+      .then(() => window.ts)
+      .catch((e) => { tsPromise = null; throw e; });
+  }
+  return tsPromise;
+}
+const LIB_DTS = document.getElementById('lib-dts').textContent;
+let libSF = null;
+function tsCheck(code) {
+  const ts = window.ts;
+  const opts = { noLib: true, target: ts.ScriptTarget.ES5, strict: true, noEmit: true, types: [] };
+  if (!libSF) libSF = ts.createSourceFile('/lib.d.ts', LIB_DTS, ts.ScriptTarget.ES5, true);
+  const main = ts.createSourceFile('/main.ts', code, ts.ScriptTarget.ES5, true);
+  const host = {
+    getSourceFile: (f) => (f === '/main.ts' ? main : f === '/lib.d.ts' ? libSF : undefined),
+    writeFile() {}, getDefaultLibFileName: () => '/lib.d.ts', useCaseSensitiveFileNames: () => true,
+    getCanonicalFileName: (f) => f, getCurrentDirectory: () => '/', getNewLine: () => '\n',
+    fileExists: (f) => f === '/main.ts' || f === '/lib.d.ts', readFile: () => undefined,
+    directoryExists: () => true, getDirectories: () => [],
+  };
+  const program = ts.createProgram(['/lib.d.ts', '/main.ts'], opts, host);
+  const syn = program.getSyntacticDiagnostics(main);
+  const diags = syn.length ? syn : program.getSemanticDiagnostics(main);
+  return diags.map((d) => {
+    const pos = d.file && d.start != null ? d.file.getLineAndCharacterOfPosition(d.start) : null;
+    return { code: d.code, line: pos ? pos.line + 1 : null, text: ts.flattenDiagnosticMessageText(d.messageText, '\n'), syntax: syn.length > 0 };
+  });
+}
+function tsTranspile(code) {
+  const ts = window.ts;
+  return ts.transpileModule(code, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
+}
+const TS_GLOSS = {
+  2322: '型が合いません。入れようとした値の型が、宣言された型と違います。',
+  2345: '引数の型が合いません。',
+  2554: '引数の数が合いません。',
+  2555: '引数が足りません。',
+  7006: '引数に型が付いていません（暗黙の any）。「: 型」を付けましょう。',
+  7005: '変数の型が決まりません（暗黙の any）。',
+  7031: '分割代入した値に型が付いていません（暗黙の any）。',
+  7034: '変数の型が決まりません（暗黙の any）。',
+  2339: 'その型には、このプロパティがありません。',
+  2551: 'そのプロパティはありません（つづりミス？）。',
+  2304: 'その名前が見つかりません（宣言していない／つづりミス？）。',
+  2552: 'その名前が見つかりません（つづりミス？）。',
+  18048: 'undefined かもしれない値です。チェックしてから使いましょう。',
+  18047: 'null かもしれない値です。チェックしてから使いましょう。',
+  18049: 'null か undefined かもしれない値です。',
+  2532: 'undefined かもしれない値です。',
+  2531: 'null かもしれない値です。',
+  2540: 'readonly（読み取り専用）なので書き換えられません。',
+  2588: 'const の変数には再代入できません。',
+  2353: '型に存在しないプロパティを書いています。',
+  2741: '必須のプロパティが足りません。',
+  2739: '必須のプロパティが足りません。',
+  2367: 'この比較は常に false になります（型が重なりません）。',
+  2366: '戻り値を返さない経路があります。',
+  2355: '戻り値の型を宣言したのに、値を返していません。',
+  2769: 'この呼び出し方に合う形がありません。',
+  18046: 'unknown 型なので、型を絞り込んでから使いましょう。',
+  2349: 'この値は関数として呼び出せません。',
+  2448: '宣言より前で使っています。',
+  2451: '同じ名前の変数を二重に宣言しています。',
+  2393: '同じ名前の関数を二重に定義しています。',
+  1005: '書き方に誤りがあります（記号の不足）。',
+  1128: '書き方に誤りがあります。',
+  1109: '式が必要です。',
+};
+function runtimeGloss(t) {
+  if (/is not defined/.test(t)) return '宣言されていない名前です（つづりミス？）';
+  if (/Cannot read propert/.test(t)) return 'undefined か null のプロパティを読もうとしました';
+  if (/Assignment to constant/.test(t)) return 'const の変数に再代入しようとしました';
+  if (/is not a function/.test(t)) return '関数ではないものを呼び出そうとしました';
+  if (/^SyntaxError/.test(t)) return '書き方に誤りがあります（カッコや引用符の閉じ忘れなど）';
+  if (/before initialization/.test(t)) return '宣言より前で使っています';
+  return '';
+}
+
+/* ===== editor ===== */
+const KW = new Set('const let var function return if else for while do of in new class extends super this switch case default break continue try catch finally throw async await typeof instanceof import export from as true false null undefined void delete yield get set static'.split(' '));
+const TSKW = new Set('interface type implements keyof readonly enum declare namespace abstract private public protected is infer satisfies'.split(' '));
+const TSTYPES = new Set('number string boolean any unknown never object bigint symbol'.split(' '));
+const escH = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+function highlight(code, lang) {
+  const re = /(\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$))|("(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|`(?:\\[\s\S]|[^`\\])*`?)|(\b\d[\d_]*(?:\.\d+)?\b)|(#?[A-Za-z_$][\w$]*)/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(code))) {
+    out += escH(code.slice(last, m.index));
+    const t = m[0];
+    let cls = '';
+    if (m[1]) cls = 'com';
+    else if (m[2]) cls = 'str';
+    else if (m[3]) cls = 'num';
+    else if (m[4]) {
+      if (KW.has(t)) cls = 'kw';
+      else if (lang === 'ts' && TSKW.has(t)) cls = 'kw';
+      else if (lang === 'ts' && TSTYPES.has(t)) cls = 'type';
+      else if (/^[A-Z]/.test(t)) cls = 'type';
+      else if (code[re.lastIndex] === '(') cls = 'fn';
+    }
+    out += cls ? '<span class="tk-' + cls + '">' + escH(t) + '</span>' : escH(t);
+    last = re.lastIndex;
+  }
+  return out + escH(code.slice(last));
+}
+let edSeq = 0;
+const KEYS = ['Tab', '{', '}', '(', ')', '[', ']', ';', ':', '=', '=>', '"', "'", '`', '.', '<', '>', '!', '&', '|', '?', '+', '-', '*', '/', '%', '$'];
+function makeEditor(code, lang, onChange, opts = {}) {
+  const box = document.createElement('div');
+  const scroll = document.createElement('div'); scroll.className = 'ed-scroll';
+  const inner = document.createElement('div'); inner.className = 'ed-inner';
+  const gutter = document.createElement('div'); gutter.className = 'gutter'; gutter.setAttribute('aria-hidden', 'true');
+  const stack = document.createElement('div'); stack.className = 'ed-stack';
+  const pre = document.createElement('pre'); pre.className = 'ed-hl';
+  inner.append(gutter, stack); scroll.append(inner); box.append(scroll);
+  const api = { el: box, get value() { return opts.readonly ? code : ta.value; } };
+  stack.append(pre);
+  let ta = null;
+  const paint = (v) => {
+    pre.innerHTML = highlight(v, lang) + '\n';
+    const n = v.split('\n').length;
+    gutter.textContent = Array.from({ length: n }, (_, i) => i + 1).join('\n');
+  };
+  if (opts.readonly) { box.classList.add('static'); paint(code); return api; }
+  pre.setAttribute('aria-hidden', 'true');
+  ta = document.createElement('textarea');
+  ta.className = 'ed-input'; ta.id = 'ed-' + (opts.key || ++edSeq);
+  ta.setAttribute('aria-label', 'コードエディタ');
+  ta.spellcheck = false; ta.wrap = 'off'; ta.rows = 1; ta.cols = 1;
+  ta.setAttribute('autocapitalize', 'off'); ta.setAttribute('autocomplete', 'off'); ta.setAttribute('autocorrect', 'off');
+  ta.value = code;
+  stack.append(ta);
+  const changed = () => { paint(ta.value); onChange && onChange(ta.value); };
+  const insert = (text) => {
+    const s = ta.selectionStart, e = ta.selectionEnd;
+    ta.setRangeText(text, s, e, 'end'); changed();
+  };
+  ta.addEventListener('input', changed);
+  ta.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') { e.preventDefault(); insert('  '); }
+    else if (e.key === 'Enter' && !e.isComposing) {
+      const s = ta.selectionStart; const before = ta.value.slice(0, s);
+      const lineStart = before.lastIndexOf('\n') + 1; const line = before.slice(lineStart);
+      let ind = (line.match(/^\s*/) || [''])[0];
+      if (/[{([]\s*$/.test(line)) ind += '  ';
+      e.preventDefault(); insert('\n' + ind);
+    }
+  });
+  paint(code);
+  const kb = document.createElement('div'); kb.className = 'keybar';
+  for (const k of KEYS) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'key' + (k === 'Tab' ? ' wide' : ''); b.textContent = k === 'Tab' ? 'インデント' : k;
+    b.addEventListener('pointerdown', (e) => e.preventDefault());
+    b.addEventListener('mousedown', (e) => e.preventDefault());
+    b.addEventListener('click', () => { ta.focus(); insert(k === 'Tab' ? '  ' : k === '=>' ? ' => ' : k); });
+    kb.append(b);
+  }
+  api.keybar = kb;
+  api.set = (v) => { ta.value = v; changed(); };
+  return api;
+}
+
+/* ===== markdown-lite ===== */
+function inl(s) {
+  let out = '', last = 0, m;
+  const re = /``\s?(.+?)\s?``|`([^`]+)`|\*\*([^*]+)\*\*/g;
+  while ((m = re.exec(s))) {
+    out += escH(s.slice(last, m.index));
+    if (m[1] != null || m[2] != null) out += '<code>' + escH(m[1] != null ? m[1] : m[2]) + '</code>';
+    else out += '<strong>' + inl(m[3]) + '</strong>';
+    last = re.lastIndex;
+  }
+  return out + escH(s.slice(last));
+}
+function md(src) {
+  const lines = src.split('\n'); let i = 0, html = '';
+  while (i < lines.length) {
+    const l = lines[i];
+    if (!l.trim()) { i++; continue; }
+    if (/^- /.test(l)) { const it = []; while (i < lines.length && /^- /.test(lines[i])) it.push(lines[i++].slice(2)); html += '<ul>' + it.map((x) => '<li>' + inl(x) + '</li>').join('') + '</ul>'; continue; }
+    if (/^\d+\. /.test(l)) { const it = []; while (i < lines.length && /^\d+\. /.test(lines[i])) it.push(lines[i++].replace(/^\d+\. /, '')); html += '<ol>' + it.map((x) => '<li>' + inl(x) + '</li>').join('') + '</ol>'; continue; }
+    if (/^> /.test(l)) { const t = []; while (i < lines.length && /^> /.test(lines[i])) t.push(lines[i++].slice(2)); html += '<p class="tip">' + inl(t.join('')) + '</p>'; continue; }
+    const p = []; while (i < lines.length && lines[i].trim() && !/^(- |\d+\. |> )/.test(lines[i])) p.push(lines[i++]);
+    html += '<p>' + inl(p.join('')) + '</p>';
+  }
+  return html;
+}
+
+/* ===== data & state ===== */
+const LESSONS = parseLessons(document.getElementById('lessons-src').textContent);
+const BY_ID = Object.fromEntries(LESSONS.map((l, i) => [l.id, Object.assign(l, { index: i })]));
+const STAGES = [
+  { n: 1, name: 'JS 基礎', lang: 'js', blurb: '変数・条件・ループ・関数・配列・オブジェクト' },
+  { n: 2, name: 'JS 実践', lang: 'js', blurb: '配列メソッド・分割代入・クラス・非同期' },
+  { n: 3, name: 'TypeScript', lang: 'ts', blurb: '型注釈から、ジェネリクス・ユーティリティ型まで' },
+];
+const stageOf = (l) => STAGES[l.stage - 1];
+const KEY = 'jsts-dojo-v1';
+const DEFAULT_STATE = () => ({ done: {}, passed: {}, quiz: {}, drafts: {}, last: null, playLang: 'js', play: {} });
+let state = DEFAULT_STATE();
+try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s) state = Object.assign(DEFAULT_STATE(), s); } catch (e) {}
+let saveTimer = null;
+function save() { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }, 200); }
+
+const $app = document.getElementById('app');
+const $top = document.getElementById('topbar');
+const h = (tag, attrs = {}, ...kids) => {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') el.className = v; else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v); else if (v != null && v !== false) el.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) el.append(k.nodeType ? k : document.createTextNode(k));
+  return el;
+};
+const ICON = {
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>',
+  reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/></svg>',
+  back: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+};
+const doneCount = () => LESSONS.filter((l) => state.done[l.id]).length;
+const nextLesson = () => LESSONS.find((l) => !state.done[l.id]) || null;
+
+/* ===== execution UI ===== */
+async function execute(code, lang, out) {
+  out.hidden = false; out.innerHTML = '';
+  const label = h('div', { class: 'out-label' }, h('span', { class: 'spinner' }), h('span', {}, lang === 'ts' ? '型チェック中' : '実行中'));
+  out.append(label);
+  const setLabel = (t, spin) => { label.innerHTML = ''; if (spin) label.append(h('span', { class: 'spinner' })); label.append(h('span', {}, t)); };
+  let runCode = code;
+  if (lang === 'ts') {
+    if (!window.ts) setLabel('TypeScript を読み込み中（初回のみ）', true);
+    try { await loadTS(); } catch (e) {
+      setLabel('エラー', false);
+      out.append(h('div', { class: 'ln uncaught' }, 'TypeScript コンパイラを読み込めませんでした。通信状況を確認して、もう一度実行してください。'));
+      return { ok: false, lines: [], loadError: true };
+    }
+    setLabel('型チェック中', true);
+    await new Promise((r) => setTimeout(r, 16));
+    let diags;
+    try { diags = tsCheck(code); } catch (e) { diags = [{ code: 0, line: null, text: String(e && e.message || e) }]; }
+    if (diags.length) {
+      setLabel(diags[0].syntax ? '構文エラー ' + diags.length + '件' : '型エラー ' + diags.length + '件 — 直すと実行できます', false);
+      for (const d of diags.slice(0, 8)) {
+        out.append(h('div', { class: 'diag' }, d.line ? h('b', {}, d.line + '行目') : null, TS_GLOSS[d.code] || '', h('span', { class: 'en' }, 'TS' + d.code + ': ' + d.text)));
+      }
+      return { ok: false, lines: [], diags };
+    }
+    runCode = tsTranspile(code);
+  }
+  setLabel('実行中', true);
+  const lines = await runJS(runCode, (l) => {
+    const gl = l.type === 'uncaught' ? runtimeGloss(l.text) : '';
+    out.append(h('div', { class: 'ln ' + l.type }, l.type === 'uncaught' ? 'エラー: ' + l.text : l.text, gl ? h('span', { class: 'jp' }, gl) : null));
+  });
+  setLabel(lang === 'ts' ? '型チェック OK · 出力' : '出力', false);
+  if (!lines.length) out.append(h('div', { class: 'ln sys' }, '（表示なし。console.log で値を表示できます）'));
+  return { ok: true, lines };
+}
+
+function codeCell({ code, lang, title, key, onChange, readonly, extraButtons, onReset, resetLabel = '戻す' }) {
+  const out = h('div', { class: 'out', hidden: true, 'aria-live': 'polite' });
+  const ed = makeEditor(code, lang, onChange, { key, readonly });
+  const runBtn = h('button', { class: 'cbtn run ' + lang, type: 'button', html: ICON.play + '実行' });
+  const resetBtn = h('button', { class: 'cbtn', type: 'button', html: ICON.reset + resetLabel });
+  const bar = h('div', { class: 'cbar' }, h('span', { class: 'lang ' + lang }, lang.toUpperCase()), h('span', { class: 'ttl' }, title), extraButtons || null, readonly ? null : resetBtn, readonly ? null : runBtn);
+  const cell = h('div', { class: 'cell-code' }, bar, ed.el, ed.keybar || null, out);
+  runBtn.addEventListener('click', async () => { runBtn.disabled = true; try { await execute(ed.value, lang, out); } finally { runBtn.disabled = false; } });
+  resetBtn.addEventListener('click', () => { if (onReset) onReset(ed); else ed.set(code); out.hidden = true; });
+  return { cell, ed, out, runBtn, resetBtn };
+}
+
+/* ===== views ===== */
+let currentView = 'home';
+function setTab(which) {
+  document.getElementById('tab-course').setAttribute('aria-current', which === 'course' ? 'page' : 'false');
+  document.getElementById('tab-play').setAttribute('aria-current', which === 'play' ? 'page' : 'false');
+}
+function topbarHome() {
+  $top.innerHTML = '';
+  $top.append(h('span', { class: 'mark', 'aria-hidden': 'true' }, h('span', { class: 'j' }, 'JS'), h('span', { class: 't' }, 'TS')), h('h2', {}, 'JS→TS 道場'), h('span', { class: 'top-count' }, doneCount() + '/' + LESSONS.length));
+}
+
+function renderHome() {
+  currentView = 'home'; setTab('course'); topbarHome();
+  $app.innerHTML = '';
+  const nxt = nextLesson();
+  const dc = doneCount();
+  const cells = h('div', { class: 'cells', 'aria-hidden': 'true' }, LESSONS.map((l) => h('div', { class: 'cell ' + stageOf(l).lang + (state.done[l.id] ? ' on' : '') + (nxt && nxt.id === l.id ? ' now' : '') })));
+  const tsStart = LESSONS.findIndex((l) => l.stage === 3);
+  const hero = h('section', { class: 'hero' },
+    h('h1', {}, 'JavaScript', h('span', { class: 'arrow' }, ' → '), 'TypeScript'),
+    h('p', {}, 'スマホで書いて、実行して、身につける。JSの基礎から始めて、TypeScriptを使いこなせるところまで進む23レッスンです。'),
+    h('div', { class: 'route' },
+      h('div', { class: 'route-head' }, h('b', {}, String(dc), h('small', {}, '/ ' + LESSONS.length + ' 完了')), h('span', {}, dc >= tsStart ? 'TypeScript ステージ' + (dc === LESSONS.length ? ' 修了' : 'に到達') : 'TypeScript まであと ' + (tsStart - dc) + ' レッスン')),
+      cells,
+      h('div', { class: 'route-ends' }, h('span', { class: 'a' }, 'JavaScript'), h('span', { class: 'b' }, 'TypeScript'))
+    ),
+    nxt ? h('button', { class: 'btn btn-main continue', type: 'button', onclick: () => openLesson(nxt.id) }, dc ? '続きから' : 'はじめる', h('span', {}, String(nxt.index + 1).padStart(2, '0') + ' ' + nxt.title)) : h('p', {}, 'すべてのレッスンを完了しました。練習場で自由に書いてみましょう。')
+  );
+  $app.append(hero);
+  for (const st of STAGES) {
+    const ls = LESSONS.filter((l) => l.stage === st.n);
+    const d = ls.filter((l) => state.done[l.id]).length;
+    const sec = h('section', { class: 'stage' },
+      h('div', { class: 'stage-head' }, h('span', { class: 'chip ' + st.lang }, 'Stage ' + st.n), h('h3', {}, st.name), h('span', { class: 'cnt' }, d + '/' + ls.length)),
+      h('ul', { class: 'lessons' }, ls.map((l) => {
+        const done = state.done[l.id], part = !done && state.passed[l.id];
+        return h('li', {}, h('button', { class: 'lrow', type: 'button', onclick: () => openLesson(l.id) },
+          h('span', { class: 'lnum' }, String(l.index + 1).padStart(2, '0')),
+          h('span', { class: 'ltxt' }, h('b', {}, l.title), h('span', {}, l.summary)),
+          h('span', { class: 'lstat ' + st.lang + (done ? ' done' : part ? ' part' : ''), 'aria-label': done ? '完了' : '未完了', html: done ? ICON.check : '' })
+        ));
+      }))
+    );
+    $app.append(sec);
+  }
+  $app.append(h('p', { class: 'note' }, '進み具合と書いたコードは、この端末のブラウザに保存されます。'));
+}
+
+function openLesson(id) {
+  const L = BY_ID[id]; if (!L) return renderHome();
+  currentView = 'lesson'; setTab('course');
+  state.last = id; save();
+  const st = stageOf(L);
+  if (st.lang === 'ts') loadTS().catch(() => {});
+  $top.innerHTML = '';
+  $top.append(h('button', { class: 'back', type: 'button', onclick: renderHome, html: ICON.back + 'コース' }), h('h2', {}, L.title), h('span', { class: 'top-count' }, (L.index + 1) + '/' + LESSONS.length));
+  $app.innerHTML = '';
+  const wrap = h('article', { class: 'lesson ' + st.lang });
+  wrap.append(h('header', { class: 'lhead' },
+    h('div', { class: 'lmeta' }, h('span', { class: 'chip ' + st.lang }, 'Stage ' + st.n + ' · ' + st.name), h('span', {}, 'Lesson ' + String(L.index + 1).padStart(2, '0'))),
+    h('h1', {}, L.title), h('p', {}, L.summary)));
+  let codeN = 0;
+  L.blocks.forEach((b, bi) => {
+    if (b.type === 'text') wrap.append(h('div', { class: 'prose block', html: md(b.lines.join('\n')) }));
+    else if (b.type === 'code') {
+      const readonly = b.flags.includes('norun');
+      codeN++;
+      const { cell } = codeCell({ code: b.lines.join('\n') + '\n', lang: b.lang, title: readonly ? '例（この画面では実行できません）' : 'コード例 ' + codeN + ' · 書き換えOK', key: L.id + '-c' + bi, readonly });
+      wrap.append(h('div', { class: 'block' }, cell));
+    } else if (b.type === 'challenge') wrap.append(challengeBlock(L, b, bi));
+    else if (b.type === 'quiz') wrap.append(quizBlock(L, b));
+  });
+  const prev = LESSONS[L.index - 1], next = LESSONS[L.index + 1];
+  wrap.append(h('nav', { class: 'lnav' },
+    prev ? h('button', { class: 'btn btn-ghost', type: 'button', onclick: () => openLesson(prev.id) }, '← 前へ') : null,
+    h('button', { class: 'btn btn-main', type: 'button', onclick: () => { state.done[L.id] = true; save(); next ? openLesson(next.id) : renderHome(); } }, next ? (state.done[L.id] ? '次のレッスンへ →' : '完了して次へ →') : 'コースを修了する')
+  ));
+  $app.append(wrap);
+  window.scrollTo(0, 0);
+}
+
+function challengeBlock(L, b, bi) {
+  const key = L.id + '-ch';
+  const card = h('section', { class: 'challenge block' + (state.passed[L.id] ? ' is-passed' : '') });
+  card.append(h('div', { class: 'ch-head' }, h('span', { class: 'chip ' + b.lang }, '練習'), h('h4', {}, 'やってみよう'), h('span', { class: 'passed', html: ICON.check.replace('<svg', '<svg width="14" height="14"') + 'クリア済み' })));
+  card.append(h('div', { class: 'prose', html: md(b.prompt) }));
+  const initial = state.drafts[key] != null ? state.drafts[key] : b.starter;
+  const verdict = h('div', { class: 'verdict', hidden: true, 'aria-live': 'polite' });
+  const { cell, ed, out, runBtn } = codeCell({ code: initial, lang: b.lang, title: '解答エディタ', key, onChange: (v) => { state.drafts[key] = v; save(); },
+    onReset: (e) => { e.set(b.starter); delete state.drafts[key]; save(); verdict.hidden = true; } });
+  card.append(cell);
+  const judgeBtn = h('button', { class: 'btn btn-main', type: 'button' }, '実行して判定');
+  const hintBtn = b.hint ? h('button', { class: 'btn btn-ghost', type: 'button' }, 'ヒント') : null;
+  const ansBtn = h('button', { class: 'btn btn-ghost', type: 'button' }, '解答例');
+  card.append(h('div', { class: 'ch-actions' }, judgeBtn, hintBtn, ansBtn), verdict);
+  const showVerdict = (kind, ...kids) => { verdict.hidden = false; verdict.className = 'verdict ' + kind; verdict.innerHTML = ''; verdict.append(...kids); };
+  const judge = async () => {
+    judgeBtn.disabled = true; runBtn.disabled = true;
+    try {
+      const code = ed.value;
+      const res = await execute(code, b.lang, out);
+      if (res.loadError) return showVerdict('ng', h('b', {}, '判定できませんでした'), h('span', {}, 'TypeScript の読み込みに失敗しました。通信状況を確認してください。'));
+      if (!res.ok) return showVerdict('ng', h('b', {}, (res.diags && res.diags[0] && res.diags[0].syntax ? '構文エラー' : '型エラー') + 'があります'), h('span', {}, '上の出力欄のエラーを直してから、もう一度判定しましょう。'));
+      const problems = [];
+      if (res.lines.some((l) => l.type === 'uncaught')) problems.push('実行中にエラーが出ています。');
+      const got = res.lines.filter((l) => l.type !== 'uncaught').map((l) => l.text).join('\n').split('\n').map((s) => s.replace(/\s+$/, '')).join('\n').trim();
+      const want = b.expect.trim();
+      const outOK = got === want;
+      if (!outOK) problems.push('出力が期待と違います。');
+      const stripped = code.replace(/\/\/[^\n]*/g, '');
+      for (const r of b.require) { try { if (!new RegExp(r.re).test(stripped)) problems.push(r.msg); } catch (e) {} }
+      if (!problems.length) {
+        const first = !state.passed[L.id];
+        state.passed[L.id] = true; save(); card.classList.add('is-passed');
+        showVerdict('ok', h('b', {}, first ? '正解！ クリアです。' : '正解！'), h('span', { style: 'color:var(--ink)' }, 'クイズに答えたら、下のボタンで次のレッスンへ進みましょう。'));
+      } else {
+        const kids = [h('b', {}, 'もう少し'), h('ul', {}, problems.map((p) => h('li', {}, p)))];
+        if (!outOK) kids.push(h('div', { class: 'cmp' }, h('div', {}, h('small', {}, '期待する出力'), h('pre', {}, want)), h('div', {}, h('small', {}, 'あなたの出力'), h('pre', {}, got || '（なし）'))));
+        showVerdict('ng', ...kids);
+      }
+    } finally { judgeBtn.disabled = false; runBtn.disabled = false; }
+  };
+  judgeBtn.addEventListener('click', judge);
+  if (hintBtn) hintBtn.addEventListener('click', () => showVerdict('info', h('b', {}, 'ヒント'), h('div', { class: 'prose', html: md(b.hint) })));
+  let confirmAns = false;
+  ansBtn.addEventListener('click', () => {
+    if (!confirmAns) { confirmAns = true; ansBtn.textContent = 'もう一度押すと解答例を入れます'; setTimeout(() => { confirmAns = false; ansBtn.textContent = '解答例'; }, 3000); return; }
+    confirmAns = false; ansBtn.textContent = '解答例';
+    ed.set(b.answer);
+    showVerdict('info', h('b', {}, '解答例をエディタに入れました'), h('span', {}, '読んで理解したら「実行して判定」を押してみましょう。自分で書き直すとさらに身につきます。'));
+  });
+  return card;
+}
+
+function quizBlock(L, b) {
+  const box = h('section', { class: 'quiz block' }, h('h4', {}, '確認クイズ'));
+  const saved = state.quiz[L.id] || (state.quiz[L.id] = {});
+  b.qs.forEach((q, qi) => {
+    // stable shuffle per question
+    const order = q.opts.map((_, i) => i);
+    let seed = 0; for (const c of L.id + qi) seed = (seed * 31 + c.charCodeAt(0)) >>> 0;
+    for (let i = order.length - 1; i > 0; i--) { seed = (seed * 1103515245 + 12345) >>> 0; const j = seed % (i + 1); [order[i], order[j]] = [order[j], order[i]]; }
+    const qEl = h('div', { class: 'q' }, h('p', {}, (qi + 1) + '. ' + q.q));
+    const why = h('p', { class: 'explain', hidden: true }, q.why);
+    const tried = new Set(saved[qi] && saved[qi].wrong || []);
+    const btns = [];
+    const finish = () => { btns.forEach((x) => (x.disabled = true)); why.hidden = false; };
+    for (const oi of order) {
+      const btn = h('button', { class: 'opt', type: 'button' }, h('span', { class: 'mk' }), h('span', {}, q.opts[oi]));
+      btn.dataset.oi = oi;
+      const mark = () => {
+        if (oi === q.answer) { btn.classList.add('right'); btn.querySelector('.mk').innerHTML = ICON.check.replace('<svg', '<svg width="12" height="12"'); finish(); }
+        else { btn.classList.add('wrong'); btn.disabled = true; btn.querySelector('.mk').textContent = '×'; }
+      };
+      btn.addEventListener('click', () => {
+        mark();
+        const rec = saved[qi] || (saved[qi] = { wrong: [], ok: false });
+        if (oi === q.answer) rec.ok = true; else rec.wrong.push(oi);
+        save();
+      });
+      btns.push(btn); qEl.append(btn);
+      if (tried.has(oi)) mark();
+      if (saved[qi] && saved[qi].ok && oi === q.answer) mark();
+    }
+    qEl.append(why);
+    box.append(qEl);
+  });
+  return box;
+}
+
+const PLAY_SAMPLES = {
+  js: '// 自由に書いて実行できます\nconst nums = [3, 1, 4, 1, 5, 9];\nconst sorted = [...nums].sort((a, b) => a - b);\nconsole.log(sorted);\nconsole.log(`最大: ${Math.max(...nums)}`);\n',
+  ts: '// TypeScript も書けます\ninterface Task {\n  title: string;\n  done: boolean;\n}\n\nconst tasks: Task[] = [\n  { title: "TSの勉強", done: true },\n  { title: "アプリを作る", done: false },\n];\n\nconst left = tasks.filter((t) => !t.done);\nconsole.log(`残り ${left.length} 件`);\n',
+};
+function renderPlay() {
+  currentView = 'play'; setTab('play');
+  $top.innerHTML = '';
+  $top.append(h('span', { class: 'mark', 'aria-hidden': 'true' }, h('span', { class: 'j' }, 'JS'), h('span', { class: 't' }, 'TS')), h('h2', {}, '練習場'));
+  $app.innerHTML = '';
+  const lang = state.playLang === 'ts' ? 'ts' : 'js';
+  if (lang === 'ts') loadTS().catch(() => {});
+  const seg = h('div', { class: 'seg', role: 'group', 'aria-label': '言語' },
+    ['js', 'ts'].map((k) => h('button', { type: 'button', class: k, 'aria-pressed': String(k === lang), onclick: () => { state.playLang = k; save(); renderPlay(); } }, k.toUpperCase())));
+  $app.append(h('div', { class: 'play-head' }, h('h1', {}, '練習場'), seg));
+  const code = state.play[lang] != null ? state.play[lang] : PLAY_SAMPLES[lang];
+  const sampleBtn = h('button', { class: 'cbtn', type: 'button' }, '見本');
+  const { cell, ed, out } = codeCell({ code, lang, title: lang === 'ts' ? 'main.ts' : 'main.js', key: 'play-' + lang, onChange: (v) => { state.play[lang] = v; save(); }, extraButtons: sampleBtn,
+    resetLabel: '空に', onReset: (e) => e.set('') });
+  sampleBtn.addEventListener('click', () => { ed.set(PLAY_SAMPLES[lang]); out.hidden = true; });
+  $app.append(cell);
+  $app.append(h('p', { class: 'play-tips' }, lang === 'ts' ? 'TS モードでは実行前に型チェックが走ります（strict 設定）。型エラーがあると実行されません。' : 'console.log の結果が下に表示されます。5秒以上かかる処理は自動で止まります。'));
+  window.scrollTo(0, 0);
+}
+
+document.getElementById('tab-course').addEventListener('click', () => { if (currentView === 'home') window.scrollTo(0, 0); renderHome(); });
+document.getElementById('tab-play').addEventListener('click', renderPlay);
+renderHome();
+</script>
+</body>
+</html>
